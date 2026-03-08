@@ -1,192 +1,1116 @@
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-if game.CoreGui:FindFirstChild("MegaHub") then
-game.CoreGui.MegaHub:Destroy()
-end
+-- Usuwanie starej wersji
+if player.PlayerGui:FindFirstChild("ModernHub") then player.PlayerGui.ModernHub:Destroy() end
 
-local gui = Instance.new("ScreenGui",game.CoreGui)
-gui.Name="MegaHub"
+local sg = Instance.new("ScreenGui", player.PlayerGui)
+sg.Name = "ModernHub"
+sg.ResetOnSpawn = false
 
-local main = Instance.new("Frame",gui)
-main.Size = UDim2.new(0,650,0,420)
-main.Position = UDim2.new(0.3,0,0.25,0)
-main.BackgroundColor3 = Color3.fromRGB(15,15,15)
-main.Active = true
-main.Draggable = true
+-- GŁÓWNA RAMKA
+local MainFrame = Instance.new("Frame", sg)
+MainFrame.Size = UDim2.new(0, 500, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10) -- Głęboka czerń
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
-local title = Instance.new("TextLabel",main)
-title.Size = UDim2.new(1,0,0,50)
-title.Text = "MEGA HUB"
-title.TextSize = 32
-title.Font = Enum.Font.SourceSansBold
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundColor3 = Color3.fromRGB(25,25,25)
+-- PASEK TYTUŁOWY
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Text = "PREMIUM HUB V2"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 24
+local tc = Instance.new("UICorner", Title)
+tc.CornerRadius = UDim.new(0, 12)
 
-local tabs = Instance.new("Frame",main)
-tabs.Size = UDim2.new(0,160,1,-50)
-tabs.Position = UDim2.new(0,0,0,50)
-tabs.BackgroundColor3 = Color3.fromRGB(20,20,20)
-
-local content = Instance.new("Frame",main)
-content.Size = UDim2.new(1,-160,1,-50)
-content.Position = UDim2.new(0,160,0,50)
-content.BackgroundTransparency = 1
-
-function createTab(name)
-
-local btn = Instance.new("TextButton",tabs)
-btn.Size = UDim2.new(1,0,0,55)
-btn.Text = name
-btn.TextSize = 22
-btn.Font = Enum.Font.SourceSansBold
-btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-btn.TextColor3 = Color3.new(1,1,1)
-
-local page = Instance.new("Frame",content)
-page.Size = UDim2.new(1,0,1,0)
-page.Visible = false
-page.BackgroundTransparency = 1
-
-btn.MouseButton1Click:Connect(function()
-
-for _,v in pairs(content:GetChildren()) do
-v.Visible=false
-end
-
-page.Visible=true
-
+-- OBSŁUGA SHIFTA (Chowanie)
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
+        MainFrame.Visible = not MainFrame.Visible
+    end
 end)
 
-return page
+-- LEWY PANEL (ZAKŁADKI)
+local TabContainer = Instance.new("Frame", MainFrame)
+TabContainer.Size = UDim2.new(0, 120, 1, -50)
+TabContainer.Position = UDim2.new(0, 0, 0, 50)
+TabContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TabContainer.BorderSizePixel = 0
+
+local TabList = Instance.new("UIListLayout", TabContainer)
+TabList.Padding = UDim.new(0, 5)
+TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- PRAWY PANEL (TREŚĆ)
+local PageContainer = Instance.new("Frame", MainFrame)
+PageContainer.Size = UDim2.new(1, -130, 1, -60)
+PageContainer.Position = UDim2.new(0, 125, 0, 55)
+PageContainer.BackgroundTransparency = 1
+
+local pages = {}
+
+-- FUNKCJA TWORZENIA ZAKŁADKI
+local function CreatePage(name)
+    local p = Instance.new("ScrollingFrame", PageContainer)
+    p.Size = UDim2.new(1, 0, 1, 0)
+    p.BackgroundTransparency = 1
+    p.Visible = false
+    p.ScrollBarThickness = 2
+    p.CanvasSize = UDim2.new(0,0,0,0) -- Automatyczne
+    local l = Instance.new("UIListLayout", p)
+    l.Padding = UDim.new(0, 10)
+    l.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    local b = Instance.new("TextButton", TabContainer)
+    b.Size = UDim2.new(0.9, 0, 0, 45)
+    b.Text = name
+    b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 16
+    Instance.new("UICorner", b)
+    
+    b.MouseButton1Click:Connect(function()
+        for _, pg in pairs(pages) do pg.Visible = false end
+        p.Visible = true
+    end)
+    
+    pages[name] = p
+    return p
 end
 
-local tabPaczki = createTab("PACZKI")
-local tabTp = createTab("TEPEKI")
-local tabKosze = createTab("KOSZE")
-local tabPlayer = createTab("PLAYER")
+-- TWORZYMY ZAKŁADKI
+local pgPaczki = CreatePage("PACZKI")
+local pgTepeki = CreatePage("TEPEKI")
+local pgKosze = CreatePage("KOSZE")
+local pgPlayer = CreatePage("PLAYER")
 
-tabPaczki.Visible=true
+pages["PACZKI"].Visible = true -- Startowa strona
 
-function createButton(parent,text,y)
-
-local b = Instance.new("TextButton",parent)
-b.Size = UDim2.new(0,300,0,60)
-b.Position = UDim2.new(0,20,0,y)
-b.Text = text
-b.TextSize = 24
-b.Font = Enum.Font.SourceSansBold
-b.BackgroundColor3 = Color3.fromRGB(40,40,40)
-b.TextColor3 = Color3.new(1,1,1)
-
-return b
+-- FUNKCJA DO TWORZENIA PRZYCISKÓW
+local function AddButton(text, parent, callback)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, -10, 0, 50)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 18
+    Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(callback)
+    parent.CanvasSize = UDim2.new(0,0,0, parent.UIListLayout.AbsoluteContentSize.Y + 60)
 end
 
--------------------------------------------------
--- PACZKI
--------------------------------------------------
+-- FUNKCJA DO TWORZENIA PRZEŁĄCZNIKÓW (TOGGLE)
+local function AddToggle(text, parent, callback)
+    local active = false
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, -10, 0, 50)
+    b.Text = text .. ": WYŁ"
+    b.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 18
+    Instance.new("UICorner", b)
+    
+    b.MouseButton1Click:Connect(function()
+        active = not active
+        b.Text = active and text .. ": WŁ" or text .. ": WYŁ"
+        b.BackgroundColor3 = active and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+        callback(active)
+    end)
+    parent.CanvasSize = UDim2.new(0,0,0, parent.UIListLayout.AbsoluteContentSize.Y + 60)
+end
 
-local openBtn = createButton(tabPaczki,"SZYBKIE OTWIERANIE",20)
+-- ===============================================================
+-- 1. ZAKŁADKA PACZKI
+-- ===============================================================
 
-openBtn.MouseButton1Click:Connect(function()
-
-loadstring([=[
--- Szybkieotwieranie paczek.lua
+AddButton("SZYBKIE OTWIERANIE", pgPaczki, function()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
 
 if pGui:FindFirstChild("HotbarOrganiserV1") then pGui.HotbarOrganiserV1:Destroy() end
-]=])()
 
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "HotbarOrganiserV1"
+sgui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.85, 0) -- Na dole na środku
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+local btn = Instance.new("TextButton", frame)
+btn.Size = UDim2.new(1, -20, 1, -20)
+btn.Position = UDim2.new(0, 10, 0, 10)
+btn.Text = "SORT PACKAGES TO HOTBAR"
+btn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+btn.Font = Enum.Font.SourceSansBold
+btn.TextWrapped = true
+Instance.new("UICorner", btn)
+
+-- FUNKCJA SORTOWANIA (Tylko paczki, reszta zostaje w plecaku)
+local function sortToHotbar()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local backpack = player:WaitForChild("Backpack")
+    
+    local found = 0
+    for _, item in ipairs(backpack:GetChildren()) do
+        -- Sprawdza czy to paczka na podstawie nazwy z Twojego ekwipunku
+        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
+            hum:EquipTool(item)
+            found = found + 1
+            task.wait(0.02)
+        end
+    end
+    
+    -- Efekt wizualny po kliknięciu
+    local oldText = btn.Text
+    btn.Text = "MOVED: " .. found
+    task.wait(1)
+    btn.Text = oldText
+end
+
+btn.MouseButton1Click:Connect(sortToHotbar)
+    print("Otwieranie...")
 end)
 
-local farmBtn = createButton(tabPaczki,"AUTOFARM PACZKI",100)
-
-farmBtn.MouseButton1Click:Connect(function()
-
-loadstring([=[
--- autoffarmpaczki.lua
+AddButton("AUTOFARM PACZKA 1", pgPaczki, function()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
-]=])()
+local vim = game:GetService("VirtualInputManager")
 
+if pGui:FindFirstChild("UltraPanelV14_FreeCam") then pGui.UltraPanelV14_FreeCam:Destroy() end
+
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "UltraPanelV14_FreeCam"
+sgui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 260, 0, 480)
+frame.Position = UDim2.new(0.8, -30, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "FREE CAM COLLECT V14"
+title.BackgroundColor3 = Color3.fromRGB(0, 120, 120)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", title)
+
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -20, 1, -60)
+scroll.Position = UDim2.new(0, 10, 0, 50)
+scroll.BackgroundTransparency = 1
+scroll.ScrollBarThickness = 4
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+
+-- 1. FAST INTERACT
+local function applyFast(v)
+    if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end
+end
+workspace.DescendantAdded:Connect(applyFast)
+for _, v in ipairs(workspace:GetDescendants()) do applyFast(v) end
+
+local function pressKey(key)
+    vim:SendKeyEvent(true, key, false, game)
+    task.wait(0.05)
+    vim:SendKeyEvent(false, key, false, game)
+end
+
+-- 2. SKANER "INSTANT E"
+local function getInstantPackage()
+    for _, p in ipairs(workspace:GetDescendants()) do
+        if p:IsA("ProximityPrompt") and (p.KeyboardKeyCode == Enum.KeyCode.E or p.ActionText:lower():find("collect")) then
+            local dist = (player.Character.HumanoidRootPart.Position - p.Parent.Position).Magnitude
+            if dist < 12 then return p end
+        end
+    end
+    return nil
+end
+
+-- 3. GŁÓWNA LOGIKA (BEZ KAMERY)
+local function startInstantFarm()
+    local packstation = nil
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if v.Name == "Packstation" and v:IsA("Model") then
+            if (player.Character.HumanoidRootPart.Position - v.WorldPivot.Position).Magnitude < 25 then
+                packstation = v break
+            end
+        end
+    end
+
+    if not packstation then return end
+    
+    local tool = player.Backpack:FindFirstChild("Drill") or player.Backpack:FindFirstChild("Wiertlo")
+    if tool and player.Character then player.Character.Humanoid:EquipTool(tool) task.wait(0.3) end
+
+    local doors = {}
+    for _, d in ipairs(packstation:GetDescendants()) do
+        if d.Name == "Door" and d:IsA("BasePart") then table.insert(doors, d) end
+    end
+
+    -- CYKL: DRILL -> IMMEDIATE COLLECT CHECK (Bez ruszania kamery)
+    for _, door in ipairs(doors) do
+        local function findF()
+            for _, p in ipairs(door:GetChildren()) do
+                if p:IsA("ProximityPrompt") and p.KeyboardKeyCode == Enum.KeyCode.F then return p end
+            end
+            return nil
+        end
+        
+        local pF = findF()
+        if pF then
+            -- Wiercenie skrytki
+            local att = 0
+            while findF() and att < 12 do
+                if fireproximityprompt then fireproximityprompt(pF) end
+                pressKey(Enum.KeyCode.F)
+                task.wait(0.25)
+                att = att + 1
+            end
+
+            -- Natychmiastowe zbieranie
+            task.wait(0.1)
+            local pE = getInstantPackage()
+            if pE then
+                if fireproximityprompt then fireproximityprompt(pE) end
+                pressKey(Enum.KeyCode.E)
+                task.wait(0.1)
+            end
+        end
+    end
+
+    -- KOŃCOWE CZYSZCZENIE
+    local finalAtt = 0
+    while finalAtt < 15 do
+        local pE = getInstantPackage()
+        if pE then
+            if fireproximityprompt then fireproximityprompt(pE) end
+            pressKey(Enum.KeyCode.E)
+            task.wait(0.15)
+        else
+            task.wait(0.1)
+        end
+        finalAtt = finalAtt + 1
+    end
+end
+
+-- PRZYCISKI
+local lokacje = {
+    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50), isPack = true},
+    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12), isPack = true},
+    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12), isPack = true},
+    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73), isPack = true},
+    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99), isPack = true},
+    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19), isPack = true},
+    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45), isPack = true},
+    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64), isPack = true},
+    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00), isPack = true},
+}
+
+for _, dane in ipairs(lokacje) do
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(1, -10, 0, 35)
+    b.Text = dane.nazwa
+    b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    Instance.new("UICorner", b)
+    
+    b.MouseButton1Click:Connect(function()
+        local root = player.Character.HumanoidRootPart
+        root.Anchored = true
+        root.CFrame = CFrame.new(dane.pos)
+        task.wait(0.5)
+        root.Anchored = false
+        if dane.isPack then startInstantFarm() end
+    end)
+end
+
+scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
 end)
 
--------------------------------------------------
--- TELEPORTY
--------------------------------------------------
+-- ===============================================================
+-- 2. ZAKŁADKA TEPEKI
+-- ===============================================================
 
-local tpBtn = createButton(tabTp,"MENU TELEPORTÓW",20)
-
-tpBtn.MouseButton1Click:Connect(function()
-
-loadstring([=[
--- tepeki.lua
+AddButton("TELEPORT: BANK", pgTepeki, function()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
-]=])()
 
+-- Usuwamy stare menu, żeby się nie dublowało
+if pGui:FindFirstChild("MainTeleportPanel") then pGui.MainTeleportPanel:Destroy() end
+
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "MainTeleportPanel"
+sgui.ResetOnSpawn = false
+
+-- GŁÓWNA RAMKA
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 250, 0, 380)
+frame.Position = UDim2.new(0.8, -20, 0.3, 0) -- Prawa strona ekranu
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- TYTUŁ
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "TELEPORTY (INSTANT)"
+title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+local titleCorner = Instance.new("UICorner", title)
+
+-- KONTENER PRZEWIJANY
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -20, 1, -60)
+scroll.Position = UDim2.new(0, 10, 0, 50)
+scroll.BackgroundTransparency = 1
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 4
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+
+-- TWOJA LISTA LOKACJI
+local lokacje = {
+    {nazwa = "BANK", pos = Vector3.new(-471.00, 26.31, -1363.00)},
+    {nazwa = "JEWELERY", pos = Vector3.new(-503.34, 44.62, 324.23)},
+    {nazwa = "DEALER 1", pos = Vector3.new(-2706.00, 44.22, 181.00)},
+    {nazwa = "BAZA", pos = Vector3.new(-1985.00, 16.30, 1004.00)},
+    {nazwa = "MEDIC", pos = Vector3.new(534.98, 44.66, -1780.59)},
+    {nazwa = "HOUSE 1", pos = Vector3.new(-1638.06, 44.72, -785.78)},
+    {nazwa = "HOUSE 2", pos = Vector3.new(-2105.77, 44.80, -878.47)},
+    {nazwa = "HOUSE 3", pos = Vector3.new(-2059.31, 44.64, -611.18)},
+}
+
+-- FUNKCJA TWORZENIA PRZYCISKÓW
+for _, dane in ipairs(lokacje) do
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(1, -10, 0, 35)
+    b.Text = dane.nazwa
+    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 14
+    
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    
+    b.MouseButton1Click:Connect(function()
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            -- [FIX]: Sztywny teleport
+            root.Anchored = true -- Zamrażamy postać
+            root.CFrame = CFrame.new(dane.pos + Vector3.new(0, 1, 0)) -- Tepamy 1 unit nad podłogę
+            
+            task.wait(0.15) -- Czekamy moment na załadowanie kolizji mapy
+            
+            root.Anchored = false -- Odmrażamy postać
+            root.Velocity = Vector3.new(0, 0, 0) -- Kasujemy pęd, żeby nie spadać
+            
+            b.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+            task.wait(0.2)
+            b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        end
+    end)
+end
+
+scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
 end)
 
--------------------------------------------------
--- KOSZE
--------------------------------------------------
-
-local koszBtn = createButton(tabKosze,"AUTOFARM KOSZE",20)
-
-koszBtn.MouseButton1Click:Connect(function()
-
-loadstring([=[
--- AUTOFARM KOSZE.lua
+AddButton("TELEPORT: JEWELERY", pgTepeki, function()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
-]=])()
 
+-- Usuwamy stare menu, żeby się nie dublowało
+if pGui:FindFirstChild("MainTeleportPanel") then pGui.MainTeleportPanel:Destroy() end
+
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "MainTeleportPanel"
+sgui.ResetOnSpawn = false
+
+-- GŁÓWNA RAMKA
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 250, 0, 380)
+frame.Position = UDim2.new(0.8, -20, 0.3, 0) -- Prawa strona ekranu
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- TYTUŁ
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "TELEPORTY (INSTANT)"
+title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+local titleCorner = Instance.new("UICorner", title)
+
+-- KONTENER PRZEWIJANY
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -20, 1, -60)
+scroll.Position = UDim2.new(0, 10, 0, 50)
+scroll.BackgroundTransparency = 1
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 4
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+
+-- TWOJA LISTA LOKACJI
+local lokacje = {
+    {nazwa = "BANK", pos = Vector3.new(-471.00, 26.31, -1363.00)},
+    {nazwa = "JEWELERY", pos = Vector3.new(-503.34, 44.62, 324.23)},
+    {nazwa = "DEALER 1", pos = Vector3.new(-2706.00, 44.22, 181.00)},
+    {nazwa = "BAZA", pos = Vector3.new(-1985.00, 16.30, 1004.00)},
+    {nazwa = "MEDIC", pos = Vector3.new(534.98, 44.66, -1780.59)},
+    {nazwa = "HOUSE 1", pos = Vector3.new(-1638.06, 44.72, -785.78)},
+    {nazwa = "HOUSE 2", pos = Vector3.new(-2105.77, 44.80, -878.47)},
+    {nazwa = "HOUSE 3", pos = Vector3.new(-2059.31, 44.64, -611.18)},
+}
+
+-- FUNKCJA TWORZENIA PRZYCISKÓW
+for _, dane in ipairs(lokacje) do
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(1, -10, 0, 35)
+    b.Text = dane.nazwa
+    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 14
+    
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    
+    b.MouseButton1Click:Connect(function()
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            -- [FIX]: Sztywny teleport
+            root.Anchored = true -- Zamrażamy postać
+            root.CFrame = CFrame.new(dane.pos + Vector3.new(0, 1, 0)) -- Tepamy 1 unit nad podłogę
+            
+            task.wait(0.15) -- Czekamy moment na załadowanie kolizji mapy
+            
+            root.Anchored = false -- Odmrażamy postać
+            root.Velocity = Vector3.new(0, 0, 0) -- Kasujemy pęd, żeby nie spadać
+            
+            b.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+            task.wait(0.2)
+            b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        end
+    end)
+end
+
+scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
 end)
 
--------------------------------------------------
--- PLAYER
--------------------------------------------------
+-- ===============================================================
+-- 3. ZAKŁADKA KOSZE
+-- ===============================================================
 
-local fallBtn = createButton(tabPlayer,"NO FALL DAMAGE",20)
+AddButton("ZBIERZ KOSZ (RĘCZNIE)", pgKosze, function()
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+local camera = workspace.CurrentCamera
 
-fallBtn.MouseButton1Click:Connect(function()
+if pGui:FindFirstChild("AutoFarmGui") then pGui.AutoFarmGui:Destroy() end
 
-loadstring([=[
--- nofalldmg.lua
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "AutoFarmGui"
+sgui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 220, 0, 150)
+frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+frame.Active = true
+frame.Draggable = true
+
+-- Przycisk Manualny (to co mieliśmy wcześniej)
+local btnManual = Instance.new("TextButton", frame)
+btnManual.Size = UDim2.new(1, -20, 0, 50)
+btnManual.Position = UDim2.new(0, 10, 0, 10)
+btnManual.Text = "Następny (Ręcznie)"
+btnManual.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+btnManual.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnManual.Font = Enum.Font.SourceSansBold
+btnManual.TextSize = 16
+
+-- Przycisk Auto-Farm
+local btnAuto = Instance.new("TextButton", frame)
+btnAuto.Size = UDim2.new(1, -20, 0, 50)
+btnAuto.Position = UDim2.new(0, 10, 0, 70)
+btnAuto.Text = "START AUTO-FARM"
+btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+btnAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnAuto.Font = Enum.Font.SourceSansBold
+btnAuto.TextSize = 16
+
+local index = 1
+local kontenery = {}
+local isFarming = false
+
+local function pobierzKontenery()
+    kontenery = {}
+    for _, nazwa in ipairs({"ContainerTonneS", "ContainerTonneG", "ContainerTonneB"}) do
+        local f = workspace:FindFirstChild(nazwa, true)
+        if f then
+            for _, k in ipairs(f:GetChildren()) do table.insert(kontenery, k) end
+        end
+    end
+end
+
+local function zbierzZKontenera(cel)
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+
+    local target = cel:FindFirstChild("Main") or cel.PrimaryPart or cel:FindFirstChildWhichIsA("BasePart")
+    if target then
+        -- 1. Teleportacja i blokada kamery
+        root.CFrame = target.CFrame * CFrame.new(0, 0, 3.5)
+        camera.CameraType = Enum.CameraType.Scriptable
+        camera.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 2, 0), target.Position)
+        
+        task.wait(0.5)
+
+        local prompt = cel:FindFirstChildWhichIsA("ProximityPrompt", true)
+        if prompt then
+            prompt:InputHoldBegin()
+            task.wait(prompt.HoldDuration + 0.3)
+            prompt:InputHoldEnd()
+            camera.CameraType = Enum.CameraType.Custom
+            return true
+        end
+    end
+    camera.CameraType = Enum.CameraType.Custom
+    return false
+end
+
+-- Logika Auto-Farmu
+btnAuto.MouseButton1Click:Connect(function()
+    if isFarming then
+        isFarming = false
+        btnAuto.Text = "START AUTO-FARM"
+        btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+        return
+    end
+
+    isFarming = true
+    btnAuto.Text = "STOP AUTO-FARM"
+    btnAuto.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    
+    pobierzKontenery()
+    
+    for i = index, #kontenery do
+        if not isFarming then break end
+        index = i
+        btnAuto.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+        
+        local sukces = zbierzZKontenera(kontenery[i])
+        if not sukces then
+            print("Pominięto kontener nr " .. i)
+        end
+        task.wait(1) -- Krótka przerwa między kontenerami dla bezpieczeństwa
+    end
+    
+    isFarming = false
+    btnAuto.Text = "FARM ZAKOŃCZONY"
+    btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+end)
+
+-- Manualny przycisk (z poprzednich wersji)
+btnManual.MouseButton1Click:Connect(function()
+    if isFarming then return end
+    pobierzKontenery()
+    if index > #kontenery then index = 1 end
+    zbierzZKontenera(kontenery[index])
+    index = index + 1
+end)
+end)
+
+AddToggle("AUTO-FARM KOSZE", pgKosze, function(state)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+local camera = workspace.CurrentCamera
+
+if pGui:FindFirstChild("AutoFarmGui") then pGui.AutoFarmGui:Destroy() end
+
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = "AutoFarmGui"
+sgui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sgui)
+frame.Size = UDim2.new(0, 220, 0, 150)
+frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+frame.Active = true
+frame.Draggable = true
+
+-- Przycisk Manualny (to co mieliśmy wcześniej)
+local btnManual = Instance.new("TextButton", frame)
+btnManual.Size = UDim2.new(1, -20, 0, 50)
+btnManual.Position = UDim2.new(0, 10, 0, 10)
+btnManual.Text = "Następny (Ręcznie)"
+btnManual.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+btnManual.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnManual.Font = Enum.Font.SourceSansBold
+btnManual.TextSize = 16
+
+-- Przycisk Auto-Farm
+local btnAuto = Instance.new("TextButton", frame)
+btnAuto.Size = UDim2.new(1, -20, 0, 50)
+btnAuto.Position = UDim2.new(0, 10, 0, 70)
+btnAuto.Text = "START AUTO-FARM"
+btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+btnAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnAuto.Font = Enum.Font.SourceSansBold
+btnAuto.TextSize = 16
+
+local index = 1
+local kontenery = {}
+local isFarming = false
+
+local function pobierzKontenery()
+    kontenery = {}
+    for _, nazwa in ipairs({"ContainerTonneS", "ContainerTonneG", "ContainerTonneB"}) do
+        local f = workspace:FindFirstChild(nazwa, true)
+        if f then
+            for _, k in ipairs(f:GetChildren()) do table.insert(kontenery, k) end
+        end
+    end
+end
+
+local function zbierzZKontenera(cel)
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+
+    local target = cel:FindFirstChild("Main") or cel.PrimaryPart or cel:FindFirstChildWhichIsA("BasePart")
+    if target then
+        -- 1. Teleportacja i blokada kamery
+        root.CFrame = target.CFrame * CFrame.new(0, 0, 3.5)
+        camera.CameraType = Enum.CameraType.Scriptable
+        camera.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 2, 0), target.Position)
+        
+        task.wait(0.5)
+
+        local prompt = cel:FindFirstChildWhichIsA("ProximityPrompt", true)
+        if prompt then
+            prompt:InputHoldBegin()
+            task.wait(prompt.HoldDuration + 0.3)
+            prompt:InputHoldEnd()
+            camera.CameraType = Enum.CameraType.Custom
+            return true
+        end
+    end
+    camera.CameraType = Enum.CameraType.Custom
+    return false
+end
+
+-- Logika Auto-Farmu
+btnAuto.MouseButton1Click:Connect(function()
+    if isFarming then
+        isFarming = false
+        btnAuto.Text = "START AUTO-FARM"
+        btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+        return
+    end
+
+    isFarming = true
+    btnAuto.Text = "STOP AUTO-FARM"
+    btnAuto.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    
+    pobierzKontenery()
+    
+    for i = index, #kontenery do
+        if not isFarming then break end
+        index = i
+        btnAuto.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+        
+        local sukces = zbierzZKontenera(kontenery[i])
+        if not sukces then
+            print("Pominięto kontener nr " .. i)
+        end
+        task.wait(1) -- Krótka przerwa między kontenerami dla bezpieczeństwa
+    end
+    
+    isFarming = false
+    btnAuto.Text = "FARM ZAKOŃCZONY"
+    btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+end)
+
+-- Manualny przycisk (z poprzednich wersji)
+btnManual.MouseButton1Click:Connect(function()
+    if isFarming then return end
+    pobierzKontenery()
+    if index > #kontenery then index = 1 end
+    zbierzZKontenera(kontenery[index])
+    index = index + 1
+end)
+    if state then print("Start Auto") else print("Stop Auto") end
+end)
+
+-- ===============================================================
+-- 4. ZAKŁADKA PLAYER
+-- ===============================================================
+
+AddToggle("NO FALL DAMAGE", pgPlayer, function(state)
+-- NO-FALL v12: AUTO-CLEANER (Brak konieczności resetu gry)
+
+-- 1. CZYSZCZENIE: Szukamy i usuwamy poprzednie wersje skryptu
 if _G.CleanupNoFall then
-_G.CleanupNoFall()
+    _G.CleanupNoFall() -- Wywołujemy funkcję czyszczącą ze starej sesji
 end
-]=])()
 
+-- 2. KONFIGURACJA
+local active = false
+local event = game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
+
+-- 3. GUI
+local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local F = Instance.new("Frame", SG)
+F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 160, 0, 100), UDim2.new(0.5, -80, 0.2, 0), Color3.fromRGB(20, 20, 20)
+F.Active, F.Draggable = true, true
+
+local B = Instance.new("TextButton", F)
+B.Size, B.Position, B.Text = UDim2.new(0.9, 0, 0.4, 0), UDim2.new(0.05, 0, 0.1, 0), "GHOST: OFF"
+B.BackgroundColor3, B.TextColor3 = Color3.fromRGB(50, 50, 50), Color3.fromRGB(255, 255, 255)
+
+local X = Instance.new("TextButton", F)
+X.Size, X.Position, X.Text = UDim2.new(0.9, 0, 0.35, 0), UDim2.new(0.05, 0, 0.55, 0), "USUŃ SKRYPT"
+X.BackgroundColor3, X.TextColor3 = Color3.fromRGB(120, 0, 0), Color3.fromRGB(255, 255, 255)
+
+-- 4. LOGIKA HOOKA
+local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+    local m = getnamecallmethod()
+    local a = {...}
+    
+    -- Jeśli skrypt został usunięty, przywracamy oryginalne działanie
+    if not _G.NoFallRunning then return old(self, ...) end
+    
+    if active and self == event and (m == "FireServer" or m == "fireServer") then
+        if a[1] and a[1][2] == "\127" and a[1][1].KevArgs and a[1][1].KevArgs[1] > 20 then
+            a[1][1].KevArgs[1] = 0
+            a[1][1].KevArgs[2] = false
+            return old(self, unpack(a))
+        end
+    end
+    return old(self, ...)
 end)
 
-local flyBtn = createButton(tabPlayer,"FLY + NOCLIP",100)
+-- 5. FUNKCJA CZYSZCZĄCA (To pozwala unikać resetu gry)
+_G.NoFallRunning = true
+_G.CleanupNoFall = function()
+    _G.NoFallRunning = false -- Zatrzymuje logikę hooka
+    active = false
+    SG:Destroy()
+    _G.CleanupNoFall = nil
+    print("🧹 Starsza wersja usunięta pomyślnie!")
+end
 
-flyBtn.MouseButton1Click:Connect(function()
+-- OBSŁUGA PRZYCISKÓW
+B.MouseButton1Click:Connect(function()
+    active = not active
+    B.Text = active and "GHOST: ON" or "GHOST: OFF"
+    B.BackgroundColor3 = active and Color3.fromRGB(130, 0, 130) or Color3.fromRGB(50, 50, 50)
+end)
 
-loadstring([=[
--- fly noclip.lua
+X.MouseButton1Click:Connect(function()
+    if _G.CleanupNoFall then _G.CleanupNoFall() end
+end)
+
+print("🚀 No-Fall v12 Załadowany (Auto-Clean aktywny)")
+end)
+
+AddToggle("NOCLIP", pgPlayer, function(state)
+-- ==========================================
+-- DODATEK DO tabPlayer: NOCLIP & FLY (WSAD+Space/Shift)
+-- ==========================================
+
 local noclipActive, flying, flySpeed = false, false, 50
-]=])()
+local noclipConn, bVel, bGyro
 
+-- 1. PRZYCISK NOCLIP
+local btnNoclip = Instance.new("TextButton", tabPlayer)
+btnNoclip.Size = UDim2.new(1, 0, 0, 50)
+btnNoclip.Text = "NOCLIP: OFF"
+btnNoclip.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+btnNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnNoclip.Font = Enum.Font.SourceSansBold
+btnNoclip.TextSize = 18
+Instance.new("UICorner", btnNoclip).CornerRadius = UDim.new(0, 6)
+
+btnNoclip.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    btnNoclip.Text = noclipActive and "NOCLIP: ON" or "NOCLIP: OFF"
+    btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    if noclipActive then
+        noclipConn = game:GetService("RunService").Stepped:Connect(function()
+            if noclipActive and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
+        task.wait(0.1)
+        if player.Character then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = true end
+            end
+        end
+    end
 end)
 
--------------------------------------------------
--- RIGHTSHIFT
--------------------------------------------------
+-- 2. PRZYCISK FLY (KLIKALNY + KLAWISZ X)
+local btnFly = Instance.new("TextButton", tabPlayer)
+btnFly.Size = UDim2.new(1, 0, 0, 50)
+btnFly.Text = "FLY: OFF (X)"
+btnFly.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+btnFly.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnFly.Font = Enum.Font.SourceSansBold
+btnFly.TextSize = 18
+Instance.new("UICorner", btnFly).CornerRadius = UDim.new(0, 6)
 
-UIS.InputBegan:Connect(function(i,g)
-
-if g then return end
-
-if i.KeyCode==Enum.KeyCode.RightShift then
-main.Visible = not main.Visible
+local function toggleFly()
+    flying = not flying
+    btnFly.Text = flying and "FLY: ON (X)" or "FLY: OFF (X)"
+    btnFly.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if flying and root then
+        bVel = Instance.new("BodyVelocity", root)
+        bVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bGyro = Instance.new("BodyGyro", root)
+        bGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+        player.Character.Humanoid.PlatformStand = true
+    else
+        if bVel then bVel:Destroy() end
+        if bGyro then bGyro:Destroy() end
+        if player.Character then player.Character.Humanoid.PlatformStand = false end
+    end
 end
 
+btnFly.MouseButton1Click:Connect(toggleFly)
+game:GetService("UserInputService").InputBegan:Connect(function(i, gpe)
+    if not gpe and i.KeyCode == Enum.KeyCode.X then toggleFly() end
 end)
+
+-- 3. SUWAK PRĘDKOŚCI
+local sLab = Instance.new("TextLabel", tabPlayer)
+sLab.Size = UDim2.new(1, 0, 0, 25)
+sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+sLab.TextColor3 = Color3.fromRGB(255, 255, 255)
+sLab.BackgroundTransparency = 1
+sLab.Font = Enum.Font.SourceSansBold
+
+local bar = Instance.new("Frame", tabPlayer)
+bar.Size = UDim2.new(0.9, 0, 0, 10)
+bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Instance.new("UICorner", bar)
+
+local slider = Instance.new("TextButton", bar)
+slider.Size = UDim2.new(0, 20, 0, 30)
+slider.Position = UDim2.new(0.16, -10, 0.5, -15)
+slider.Text = ""
+Instance.new("UICorner", slider)
+
+local dragging = false
+slider.MouseButton1Down:Connect(function() dragging = true end)
+game:GetService("UserInputService").InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+game:GetService("UserInputService").InputChanged:Connect(function(i)
+    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local p = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+        slider.Position = UDim2.new(p, -10, 0.5, -15)
+        flySpeed = math.floor(p * 350)
+        sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+    end
+end)
+
+-- LOGIKA RUCHU (RenderStepped musi być w głównym skrypcie)
+game:GetService("RunService").RenderStepped:Connect(function()
+    if flying and bVel and bGyro then
+        local dir = Vector3.new(0,0,0)
+        local cf = workspace.CurrentCamera.CFrame
+        local uis = game:GetService("UserInputService")
+        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+        bVel.Velocity = dir * flySpeed
+        bGyro.CFrame = cf
+    end
+end)
+end)
+
+AddToggle("FLY (X)", pgPlayer, function(state)
+-- ==========================================
+-- DODATEK DO tabPlayer: NOCLIP & FLY (WSAD+Space/Shift)
+-- ==========================================
+
+local noclipActive, flying, flySpeed = false, false, 50
+local noclipConn, bVel, bGyro
+
+-- 1. PRZYCISK NOCLIP
+local btnNoclip = Instance.new("TextButton", tabPlayer)
+btnNoclip.Size = UDim2.new(1, 0, 0, 50)
+btnNoclip.Text = "NOCLIP: OFF"
+btnNoclip.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+btnNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnNoclip.Font = Enum.Font.SourceSansBold
+btnNoclip.TextSize = 18
+Instance.new("UICorner", btnNoclip).CornerRadius = UDim.new(0, 6)
+
+btnNoclip.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    btnNoclip.Text = noclipActive and "NOCLIP: ON" or "NOCLIP: OFF"
+    btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    if noclipActive then
+        noclipConn = game:GetService("RunService").Stepped:Connect(function()
+            if noclipActive and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
+        task.wait(0.1)
+        if player.Character then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = true end
+            end
+        end
+    end
+end)
+
+-- 2. PRZYCISK FLY (KLIKALNY + KLAWISZ X)
+local btnFly = Instance.new("TextButton", tabPlayer)
+btnFly.Size = UDim2.new(1, 0, 0, 50)
+btnFly.Text = "FLY: OFF (X)"
+btnFly.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+btnFly.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnFly.Font = Enum.Font.SourceSansBold
+btnFly.TextSize = 18
+Instance.new("UICorner", btnFly).CornerRadius = UDim.new(0, 6)
+
+local function toggleFly()
+    flying = not flying
+    btnFly.Text = flying and "FLY: ON (X)" or "FLY: OFF (X)"
+    btnFly.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if flying and root then
+        bVel = Instance.new("BodyVelocity", root)
+        bVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bGyro = Instance.new("BodyGyro", root)
+        bGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+        player.Character.Humanoid.PlatformStand = true
+    else
+        if bVel then bVel:Destroy() end
+        if bGyro then bGyro:Destroy() end
+        if player.Character then player.Character.Humanoid.PlatformStand = false end
+    end
+end
+
+btnFly.MouseButton1Click:Connect(toggleFly)
+game:GetService("UserInputService").InputBegan:Connect(function(i, gpe)
+    if not gpe and i.KeyCode == Enum.KeyCode.X then toggleFly() end
+end)
+
+-- 3. SUWAK PRĘDKOŚCI
+local sLab = Instance.new("TextLabel", tabPlayer)
+sLab.Size = UDim2.new(1, 0, 0, 25)
+sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+sLab.TextColor3 = Color3.fromRGB(255, 255, 255)
+sLab.BackgroundTransparency = 1
+sLab.Font = Enum.Font.SourceSansBold
+
+local bar = Instance.new("Frame", tabPlayer)
+bar.Size = UDim2.new(0.9, 0, 0, 10)
+bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Instance.new("UICorner", bar)
+
+local slider = Instance.new("TextButton", bar)
+slider.Size = UDim2.new(0, 20, 0, 30)
+slider.Position = UDim2.new(0.16, -10, 0.5, -15)
+slider.Text = ""
+Instance.new("UICorner", slider)
+
+local dragging = false
+slider.MouseButton1Down:Connect(function() dragging = true end)
+game:GetService("UserInputService").InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+game:GetService("UserInputService").InputChanged:Connect(function(i)
+    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local p = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+        slider.Position = UDim2.new(p, -10, 0.5, -15)
+        flySpeed = math.floor(p * 350)
+        sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+    end
+end)
+
+-- LOGIKA RUCHU (RenderStepped musi być w głównym skrypcie)
+game:GetService("RunService").RenderStepped:Connect(function()
+    if flying and bVel and bGyro then
+        local dir = Vector3.new(0,0,0)
+        local cf = workspace.CurrentCamera.CFrame
+        local uis = game:GetService("UserInputService")
+        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+        bVel.Velocity = dir * flySpeed
+        bGyro.CFrame = cf
+    end
+end)
+end)
+
+-- PRZYKŁAD SUWAKA (Makieta)
+local sliderLabel = Instance.new("TextLabel", pgPlayer)
+sliderLabel.Size = UDim2.new(1, 0, 0, 30)
+sliderLabel.Text = "PRĘDKOŚĆ LOTU"
+sliderLabel.TextColor3 = Color3.fromRGB(255,255,255)
+sliderLabel.BackgroundTransparency = 1
+sliderLabel.Font = Enum.Font.SourceSansBold
