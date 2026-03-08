@@ -1,235 +1,226 @@
+--[[
+    ULTIMATE MULTI-TOOL V2
+    Nowoczesne GUI z zakładkami
+    Ukrywanie: Prawy Shift
+    Przeciąganie: Lewy przycisk myszy
+]]
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local pGui = player:WaitForChild("PlayerGui")
+local uis = game:GetService("UserInputService")
+local vim = game:GetService("VirtualInputManager")
+local camera = workspace.CurrentCamera
+local runService = game:GetService("RunService")
 
--- Usuwanie starej wersji
-if player.PlayerGui:FindFirstChild("ModernHub") then player.PlayerGui.ModernHub:Destroy() end
+-- Usuń stare GUI
+local guiName = "UltimateMultiToolV2"
+if pGui:FindFirstChild(guiName) then pGui[guiName]:Destroy() end
 
-local sg = Instance.new("ScreenGui", player.PlayerGui)
-sg.Name = "ModernHub"
-sg.ResetOnSpawn = false
+-- GŁÓWNE GUI
+local sgui = Instance.new("ScreenGui", pGui)
+sgui.Name = guiName
+sgui.ResetOnSpawn = false
+sgui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+sgui.DisplayOrder = 999
 
 -- GŁÓWNA RAMKA
-local MainFrame = Instance.new("Frame", sg)
-MainFrame.Size = UDim2.new(0, 500, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10) -- Głęboka czerń
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local mainFrame = Instance.new("Frame", sgui)
+mainFrame.Size = UDim2.new(0, 700, 0, 550)
+mainFrame.Position = UDim2.new(0.5, -350, 0.3, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Visible = true
 
--- PASEK TYTUŁOWY
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Text = "PREMIUM HUB V2"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 24
-local tc = Instance.new("UICorner", Title)
-tc.CornerRadius = UDim.new(0, 12)
+-- Cienie i efekty
+local shadow = Instance.new("ImageLabel", mainFrame)
+shadow.Size = UDim2.new(1, 40, 1, 40)
+shadow.Position = UDim2.new(0, -20, 0, -20)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+shadow.ImageTransparency = 0.5
+shadow.ZIndex = -1
 
--- OBSŁUGA SHIFTA (Chowanie)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
-        MainFrame.Visible = not MainFrame.Visible
-    end
-end)
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 12)
 
--- LEWY PANEL (ZAKŁADKI)
-local TabContainer = Instance.new("Frame", MainFrame)
-TabContainer.Size = UDim2.new(0, 120, 1, -50)
-TabContainer.Position = UDim2.new(0, 0, 0, 50)
-TabContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-TabContainer.BorderSizePixel = 0
+-- NAGŁÓWEK
+local header = Instance.new("Frame", mainFrame)
+header.Size = UDim2.new(1, 0, 0, 50)
+header.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+header.BorderSizePixel = 0
 
-local TabList = Instance.new("UIListLayout", TabContainer)
-TabList.Padding = UDim.new(0, 5)
-TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local headerCorner = Instance.new("UICorner", header)
+headerCorner.CornerRadius = UDim.new(0, 12)
 
--- PRAWY PANEL (TREŚĆ)
-local PageContainer = Instance.new("Frame", MainFrame)
-PageContainer.Size = UDim2.new(1, -130, 1, -60)
-PageContainer.Position = UDim2.new(0, 125, 0, 55)
-PageContainer.BackgroundTransparency = 1
+local title = Instance.new("TextLabel", header)
+title.Size = UDim2.new(1, -50, 1, 0)
+title.Position = UDim2.new(0, 20, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ MULTI-TOOL V2 ⚡"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 24
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
 
-local pages = {}
+local hideBtn = Instance.new("TextButton", header)
+hideBtn.Size = UDim2.new(0, 40, 0, 40)
+hideBtn.Position = UDim2.new(1, -45, 0, 5)
+hideBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+hideBtn.Text = "👁️"
+hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+hideBtn.TextSize = 20
+hideBtn.Font = Enum.Font.GothamBold
+
+local hideCorner = Instance.new("UICorner", hideBtn)
+hideCorner.CornerRadius = UDim.new(0, 8)
+
+-- ZAKŁADKI
+local tabs = Instance.new("Frame", mainFrame)
+tabs.Size = UDim2.new(1, -40, 0, 50)
+tabs.Position = UDim2.new(0, 20, 0, 70)
+tabs.BackgroundTransparency = 1
+
+local tabLayout = Instance.new("UIListLayout", tabs)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.Padding = UDim.new(0, 10)
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+
+local tabsList = {}
+local tabContents = {}
+
+-- KONTENER NA TREŚĆ ZAKŁADEK
+local contentFrame = Instance.new("Frame", mainFrame)
+contentFrame.Size = UDim2.new(1, -40, 1, -140)
+contentFrame.Position = UDim2.new(0, 20, 0, 130)
+contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+contentFrame.BorderSizePixel = 0
+
+local contentCorner = Instance.new("UICorner", contentFrame)
+contentCorner.CornerRadius = UDim.new(0, 12)
 
 -- FUNKCJA TWORZENIA ZAKŁADKI
-local function CreatePage(name)
-    local p = Instance.new("ScrollingFrame", PageContainer)
-    p.Size = UDim2.new(1, 0, 1, 0)
-    p.BackgroundTransparency = 1
-    p.Visible = false
-    p.ScrollBarThickness = 2
-    p.CanvasSize = UDim2.new(0,0,0,0) -- Automatyczne
-    local l = Instance.new("UIListLayout", p)
-    l.Padding = UDim.new(0, 10)
-    l.SortOrder = Enum.SortOrder.LayoutOrder
+local function createTab(name, icon)
+    local tab = Instance.new("TextButton", tabs)
+    tab.Size = UDim2.new(0, 120, 1, 0)
+    tab.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    tab.Text = icon .. "  " .. name
+    tab.TextColor3 = Color3.fromRGB(180, 180, 180)
+    tab.TextSize = 16
+    tab.Font = Enum.Font.GothamBold
     
-    local b = Instance.new("TextButton", TabContainer)
-    b.Size = UDim2.new(0.9, 0, 0, 45)
-    b.Text = name
-    b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    b.TextSize = 16
-    Instance.new("UICorner", b)
+    local tabCorner = Instance.new("UICorner", tab)
+    tabCorner.CornerRadius = UDim.new(0, 8)
     
-    b.MouseButton1Click:Connect(function()
-        for _, pg in pairs(pages) do pg.Visible = false end
-        p.Visible = true
+    local container = Instance.new("ScrollingFrame", contentFrame)
+    container.Size = UDim2.new(1, -30, 1, -30)
+    container.Position = UDim2.new(0, 15, 0, 15)
+    container.BackgroundTransparency = 1
+    container.ScrollBarThickness = 4
+    container.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 90)
+    container.Visible = false
+    container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    
+    local containerLayout = Instance.new("UIListLayout", container)
+    containerLayout.Padding = UDim.new(0, 10)
+    containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    
+    containerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        container.CanvasSize = UDim2.new(0, 0, 0, containerLayout.AbsoluteContentSize.Y + 20)
     end)
     
-    pages[name] = p
-    return p
-end
-
--- TWORZYMY ZAKŁADKI
-local pgPaczki = CreatePage("PACZKI")
-local pgTepeki = CreatePage("TEPEKI")
-local pgKosze = CreatePage("KOSZE")
-local pgPlayer = CreatePage("PLAYER")
-
-pages["PACZKI"].Visible = true -- Startowa strona
-
--- FUNKCJA DO TWORZENIA PRZYCISKÓW
-local function AddButton(text, parent, callback)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, -10, 0, 50)
-    b.Text = text
-    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    b.TextSize = 18
-    Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(callback)
-    parent.CanvasSize = UDim2.new(0,0,0, parent.UIListLayout.AbsoluteContentSize.Y + 60)
-end
-
--- FUNKCJA DO TWORZENIA PRZEŁĄCZNIKÓW (TOGGLE)
-local function AddToggle(text, parent, callback)
-    local active = false
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, -10, 0, 50)
-    b.Text = text .. ": WYŁ"
-    b.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    b.TextSize = 18
-    Instance.new("UICorner", b)
+    table.insert(tabsList, tab)
+    tabContents[name] = container
     
-    b.MouseButton1Click:Connect(function()
-        active = not active
-        b.Text = active and text .. ": WŁ" or text .. ": WYŁ"
-        b.BackgroundColor3 = active and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-        callback(active)
-    end)
-    parent.CanvasSize = UDim2.new(0,0,0, parent.UIListLayout.AbsoluteContentSize.Y + 60)
-end
-
--- ===============================================================
--- 1. ZAKŁADKA PACZKI
--- ===============================================================
-
-AddButton("SZYBKIE OTWIERANIE", pgPaczki, function()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
-
-if pGui:FindFirstChild("HotbarOrganiserV1") then pGui.HotbarOrganiserV1:Destroy() end
-
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "HotbarOrganiserV1"
-sgui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.85, 0) -- Na dole na środku
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame)
-
-local btn = Instance.new("TextButton", frame)
-btn.Size = UDim2.new(1, -20, 1, -20)
-btn.Position = UDim2.new(0, 10, 0, 10)
-btn.Text = "SORT PACKAGES TO HOTBAR"
-btn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-btn.Font = Enum.Font.SourceSansBold
-btn.TextWrapped = true
-Instance.new("UICorner", btn)
-
--- FUNKCJA SORTOWANIA (Tylko paczki, reszta zostaje w plecaku)
-local function sortToHotbar()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hum = char:WaitForChild("Humanoid")
-    local backpack = player:WaitForChild("Backpack")
-    
-    local found = 0
-    for _, item in ipairs(backpack:GetChildren()) do
-        -- Sprawdza czy to paczka na podstawie nazwy z Twojego ekwipunku
-        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
-            hum:EquipTool(item)
-            found = found + 1
-            task.wait(0.02)
+    tab.MouseButton1Click:Connect(function()
+        for _, t in ipairs(tabsList) do
+            t.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+            t.TextColor3 = Color3.fromRGB(180, 180, 180)
         end
-    end
+        for _, cont in pairs(tabContents) do
+            cont.Visible = false
+        end
+        tab.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+        tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        container.Visible = true
+    end)
     
-    -- Efekt wizualny po kliknięciu
-    local oldText = btn.Text
-    btn.Text = "MOVED: " .. found
-    task.wait(1)
-    btn.Text = oldText
+    return container
 end
 
-btn.MouseButton1Click:Connect(sortToHotbar)
-    print("Otwieranie...")
-end)
+-- TWORZENIE ZAKŁADEK
+local packagesTab = createTab("PACZKI", "📦")
+local teleportsTab = createTab("TP", "🌍")
+local binsTab = createTab("KOSZE", "🗑️")
+local playerTab = createTab("PLAYER", "👤")
 
-AddButton("AUTOFARM PACZKA 1", pgPaczki, function()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
-local vim = game:GetService("VirtualInputManager")
+-- ==========================================
+-- ZAKŁADKA PACZKI
+-- ==========================================
 
-if pGui:FindFirstChild("UltraPanelV14_FreeCam") then pGui.UltraPanelV14_FreeCam:Destroy() end
+-- SZYBKIE OTWIERANIE
+local quickBtn = Instance.new("TextButton", packagesTab)
+quickBtn.Size = UDim2.new(1, -20, 0, 60)
+quickBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+quickBtn.Text = "📦 SZYBKIE OTWIERANIE PACZEK"
+quickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+quickBtn.TextSize = 20
+quickBtn.Font = Enum.Font.GothamBold
 
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "UltraPanelV14_FreeCam"
-sgui.ResetOnSpawn = false
+local quickCorner = Instance.new("UICorner", quickBtn)
+quickCorner.CornerRadius = UDim.new(0, 10)
 
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 260, 0, 480)
-frame.Position = UDim2.new(0.8, -30, 0.2, 0)
-frame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame)
+-- SEPARATOR
+local sep1 = Instance.new("Frame", packagesTab)
+sep1.Size = UDim2.new(1, -20, 0, 2)
+sep1.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+sep1.BorderSizePixel = 0
+Instance.new("UICorner", sep1)
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "FREE CAM COLLECT V14"
-title.BackgroundColor3 = Color3.fromRGB(0, 120, 120)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", title)
+-- NAGŁÓWEK PAKSTATIONS
+local packHeader = Instance.new("TextLabel", packagesTab)
+packHeader.Size = UDim2.new(1, -20, 0, 40)
+packHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+packHeader.Text = "🏭 PAKSTATIONS (AUTO-FARM)"
+packHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+packHeader.TextSize = 18
+packHeader.Font = Enum.Font.GothamBold
 
-local scroll = Instance.new("ScrollingFrame", frame)
-scroll.Size = UDim2.new(1, -20, 1, -60)
-scroll.Position = UDim2.new(0, 10, 0, 50)
-scroll.BackgroundTransparency = 1
-scroll.ScrollBarThickness = 4
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 5)
+local packHeaderCorner = Instance.new("UICorner", packHeader)
+packHeaderCorner.CornerRadius = UDim.new(0, 8)
 
--- 1. FAST INTERACT
+-- SIATKA PAKSTATIONS
+local packGrid = Instance.new("Frame", packagesTab)
+packGrid.Size = UDim2.new(1, -20, 0, 300)
+packGrid.BackgroundTransparency = 1
+
+local gridLayout = Instance.new("UIGridLayout", packGrid)
+gridLayout.FillDirection = Enum.FillDirection.Horizontal
+gridLayout.CellSize = UDim2.new(0, 120, 0, 60)
+gridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+
+-- LOKACJE PAKSTATIONS
+local packLokacje = {
+    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
+    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
+    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12)},
+    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73)},
+    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99)},
+    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19)},
+    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45)},
+    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64)},
+    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
+}
+
+-- FUNKCJE POMOCNICZE DLA PAKSTATIONS
 local function applyFast(v)
     if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end
 end
+
 workspace.DescendantAdded:Connect(applyFast)
 for _, v in ipairs(workspace:GetDescendants()) do applyFast(v) end
 
@@ -239,7 +230,6 @@ local function pressKey(key)
     vim:SendKeyEvent(false, key, false, game)
 end
 
--- 2. SKANER "INSTANT E"
 local function getInstantPackage()
     for _, p in ipairs(workspace:GetDescendants()) do
         if p:IsA("ProximityPrompt") and (p.KeyboardKeyCode == Enum.KeyCode.E or p.ActionText:lower():find("collect")) then
@@ -250,7 +240,6 @@ local function getInstantPackage()
     return nil
 end
 
--- 3. GŁÓWNA LOGIKA (BEZ KAMERY)
 local function startInstantFarm()
     local packstation = nil
     for _, v in ipairs(workspace:GetDescendants()) do
@@ -271,7 +260,6 @@ local function startInstantFarm()
         if d.Name == "Door" and d:IsA("BasePart") then table.insert(doors, d) end
     end
 
-    -- CYKL: DRILL -> IMMEDIATE COLLECT CHECK (Bez ruszania kamery)
     for _, door in ipairs(doors) do
         local function findF()
             for _, p in ipairs(door:GetChildren()) do
@@ -282,7 +270,6 @@ local function startInstantFarm()
         
         local pF = findF()
         if pF then
-            -- Wiercenie skrytki
             local att = 0
             while findF() and att < 12 do
                 if fireproximityprompt then fireproximityprompt(pF) end
@@ -291,7 +278,6 @@ local function startInstantFarm()
                 att = att + 1
             end
 
-            -- Natychmiastowe zbieranie
             task.wait(0.1)
             local pE = getInstantPackage()
             if pE then
@@ -302,7 +288,6 @@ local function startInstantFarm()
         end
     end
 
-    -- KOŃCOWE CZYSZCZENIE
     local finalAtt = 0
     while finalAtt < 15 do
         local pE = getInstantPackage()
@@ -317,92 +302,58 @@ local function startInstantFarm()
     end
 end
 
--- PRZYCISKI
-local lokacje = {
-    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50), isPack = true},
-    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12), isPack = true},
-    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12), isPack = true},
-    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73), isPack = true},
-    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99), isPack = true},
-    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19), isPack = true},
-    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45), isPack = true},
-    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64), isPack = true},
-    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00), isPack = true},
-}
-
-for _, dane in ipairs(lokacje) do
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(1, -10, 0, 35)
-    b.Text = dane.nazwa
-    b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    Instance.new("UICorner", b)
+-- TWORZENIE PRZYCISKÓW PAKSTATIONS
+for _, dane in ipairs(packLokacje) do
+    local btn = Instance.new("TextButton", packGrid)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Text = dane.nazwa
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 16
+    btn.Font = Enum.Font.GothamBold
     
-    b.MouseButton1Click:Connect(function()
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    
+    btn.MouseButton1Click:Connect(function()
         local root = player.Character.HumanoidRootPart
         root.Anchored = true
         root.CFrame = CFrame.new(dane.pos)
         task.wait(0.5)
         root.Anchored = false
-        if dane.isPack then startInstantFarm() end
+        startInstantFarm()
+        
+        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+        task.wait(0.2)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
     end)
 end
 
-scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
-end)
+-- ==========================================
+-- ZAKŁADKA TELEPORTY
+-- ==========================================
 
--- ===============================================================
--- 2. ZAKŁADKA TEPEKI
--- ===============================================================
+local tpHeader = Instance.new("TextLabel", teleportsTab)
+tpHeader.Size = UDim2.new(1, -20, 0, 40)
+tpHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+tpHeader.Text = "📍 TELEPORTY"
+tpHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpHeader.TextSize = 20
+tpHeader.Font = Enum.Font.GothamBold
 
-AddButton("TELEPORT: BANK", pgTepeki, function()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
+local tpHeaderCorner = Instance.new("UICorner", tpHeader)
+tpHeaderCorner.CornerRadius = UDim.new(0, 8)
 
--- Usuwamy stare menu, żeby się nie dublowało
-if pGui:FindFirstChild("MainTeleportPanel") then pGui.MainTeleportPanel:Destroy() end
+local tpGrid = Instance.new("Frame", teleportsTab)
+tpGrid.Size = UDim2.new(1, -20, 0, 300)
+tpGrid.BackgroundTransparency = 1
 
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "MainTeleportPanel"
-sgui.ResetOnSpawn = false
+local tpGridLayout = Instance.new("UIGridLayout", tpGrid)
+tpGridLayout.FillDirection = Enum.FillDirection.Horizontal
+tpGridLayout.CellSize = UDim2.new(0, 150, 0, 60)
+tpGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 
--- GŁÓWNA RAMKA
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 250, 0, 380)
-frame.Position = UDim2.new(0.8, -20, 0.3, 0) -- Prawa strona ekranu
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-
-local corner = Instance.new("UICorner", frame)
-corner.CornerRadius = UDim.new(0, 10)
-
--- TYTUŁ
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "TELEPORTY (INSTANT)"
-title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 18
-local titleCorner = Instance.new("UICorner", title)
-
--- KONTENER PRZEWIJANY
-local scroll = Instance.new("ScrollingFrame", frame)
-scroll.Size = UDim2.new(1, -20, 1, -60)
-scroll.Position = UDim2.new(0, 10, 0, 50)
-scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 4
-
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 5)
-
--- TWOJA LISTA LOKACJI
-local lokacje = {
+local teleporty = {
     {nazwa = "BANK", pos = Vector3.new(-471.00, 26.31, -1363.00)},
     {nazwa = "JEWELERY", pos = Vector3.new(-503.34, 44.62, 324.23)},
     {nazwa = "DEALER 1", pos = Vector3.new(-2706.00, 44.22, 181.00)},
@@ -413,177 +364,85 @@ local lokacje = {
     {nazwa = "HOUSE 3", pos = Vector3.new(-2059.31, 44.64, -611.18)},
 }
 
--- FUNKCJA TWORZENIA PRZYCISKÓW
-for _, dane in ipairs(lokacje) do
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(1, -10, 0, 35)
-    b.Text = dane.nazwa
-    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    b.TextSize = 14
+for _, dane in ipairs(teleporty) do
+    local btn = Instance.new("TextButton", tpGrid)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Text = dane.nazwa
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 16
+    btn.Font = Enum.Font.GothamBold
     
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 8)
     
-    b.MouseButton1Click:Connect(function()
-        local char = player.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if root then
-            -- [FIX]: Sztywny teleport
-            root.Anchored = true -- Zamrażamy postać
-            root.CFrame = CFrame.new(dane.pos + Vector3.new(0, 1, 0)) -- Tepamy 1 unit nad podłogę
-            
-            task.wait(0.15) -- Czekamy moment na załadowanie kolizji mapy
-            
-            root.Anchored = false -- Odmrażamy postać
-            root.Velocity = Vector3.new(0, 0, 0) -- Kasujemy pęd, żeby nie spadać
-            
-            b.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-            task.wait(0.2)
-            b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        end
+    btn.MouseButton1Click:Connect(function()
+        local root = player.Character.HumanoidRootPart
+        root.Anchored = true
+        root.CFrame = CFrame.new(dane.pos + Vector3.new(0, 1, 0))
+        task.wait(0.15)
+        root.Anchored = false
+        root.Velocity = Vector3.new(0, 0, 0)
+        
+        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+        task.wait(0.2)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
     end)
 end
 
-scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
-end)
+-- ==========================================
+-- ZAKŁADKA KOSZE
+-- ==========================================
 
-AddButton("TELEPORT: JEWELERY", pgTepeki, function()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
+local binsHeader = Instance.new("TextLabel", binsTab)
+binsHeader.Size = UDim2.new(1, -20, 0, 40)
+binsHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+binsHeader.Text = "🗑️ AUTO-FARM KOSZE"
+binsHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+binsHeader.TextSize = 20
+binsHeader.Font = Enum.Font.GothamBold
 
--- Usuwamy stare menu, żeby się nie dublowało
-if pGui:FindFirstChild("MainTeleportPanel") then pGui.MainTeleportPanel:Destroy() end
+local binsHeaderCorner = Instance.new("UICorner", binsHeader)
+binsHeaderCorner.CornerRadius = UDim.new(0, 8)
 
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "MainTeleportPanel"
-sgui.ResetOnSpawn = false
+-- PRZYCISK RĘCZNY
+local manualBinBtn = Instance.new("TextButton", binsTab)
+manualBinBtn.Size = UDim2.new(1, -20, 0, 70)
+manualBinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+manualBinBtn.Text = "🖐️ NASTĘPNY KOSZ (RĘCZNIE)"
+manualBinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+manualBinBtn.TextSize = 18
+manualBinBtn.Font = Enum.Font.GothamBold
 
--- GŁÓWNA RAMKA
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 250, 0, 380)
-frame.Position = UDim2.new(0.8, -20, 0.3, 0) -- Prawa strona ekranu
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+local manualBinCorner = Instance.new("UICorner", manualBinBtn)
+manualBinCorner.CornerRadius = UDim.new(0, 10)
 
-local corner = Instance.new("UICorner", frame)
-corner.CornerRadius = UDim.new(0, 10)
+-- PRZYCISK AUTO Z PRZEŁĄCZNIKIEM
+local autoBinBtn = Instance.new("TextButton", binsTab)
+autoBinBtn.Size = UDim2.new(1, -20, 0, 70)
+autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+autoBinBtn.Text = "⏯️ START AUTO-FARM"
+autoBinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoBinBtn.TextSize = 18
+autoBinBtn.Font = Enum.Font.GothamBold
 
--- TYTUŁ
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "TELEPORTY (INSTANT)"
-title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 18
-local titleCorner = Instance.new("UICorner", title)
+local autoBinCorner = Instance.new("UICorner", autoBinBtn)
+autoBinCorner.CornerRadius = UDim.new(0, 10)
 
--- KONTENER PRZEWIJANY
-local scroll = Instance.new("ScrollingFrame", frame)
-scroll.Size = UDim2.new(1, -20, 1, -60)
-scroll.Position = UDim2.new(0, 10, 0, 50)
-scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 4
+-- STATUS
+local binStatus = Instance.new("TextLabel", binsTab)
+binStatus.Size = UDim2.new(1, -20, 0, 40)
+binStatus.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+binStatus.Text = "Gotowy do pracy"
+binStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+binStatus.TextSize = 16
+binStatus.Font = Enum.Font.Gotham
 
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 5)
+local binStatusCorner = Instance.new("UICorner", binStatus)
+binStatusCorner.CornerRadius = UDim.new(0, 8)
 
--- TWOJA LISTA LOKACJI
-local lokacje = {
-    {nazwa = "BANK", pos = Vector3.new(-471.00, 26.31, -1363.00)},
-    {nazwa = "JEWELERY", pos = Vector3.new(-503.34, 44.62, 324.23)},
-    {nazwa = "DEALER 1", pos = Vector3.new(-2706.00, 44.22, 181.00)},
-    {nazwa = "BAZA", pos = Vector3.new(-1985.00, 16.30, 1004.00)},
-    {nazwa = "MEDIC", pos = Vector3.new(534.98, 44.66, -1780.59)},
-    {nazwa = "HOUSE 1", pos = Vector3.new(-1638.06, 44.72, -785.78)},
-    {nazwa = "HOUSE 2", pos = Vector3.new(-2105.77, 44.80, -878.47)},
-    {nazwa = "HOUSE 3", pos = Vector3.new(-2059.31, 44.64, -611.18)},
-}
-
--- FUNKCJA TWORZENIA PRZYCISKÓW
-for _, dane in ipairs(lokacje) do
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(1, -10, 0, 35)
-    b.Text = dane.nazwa
-    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.SourceSansBold
-    b.TextSize = 14
-    
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    
-    b.MouseButton1Click:Connect(function()
-        local char = player.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if root then
-            -- [FIX]: Sztywny teleport
-            root.Anchored = true -- Zamrażamy postać
-            root.CFrame = CFrame.new(dane.pos + Vector3.new(0, 1, 0)) -- Tepamy 1 unit nad podłogę
-            
-            task.wait(0.15) -- Czekamy moment na załadowanie kolizji mapy
-            
-            root.Anchored = false -- Odmrażamy postać
-            root.Velocity = Vector3.new(0, 0, 0) -- Kasujemy pęd, żeby nie spadać
-            
-            b.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-            task.wait(0.2)
-            b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        end
-    end)
-end
-
-scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
-end)
-
--- ===============================================================
--- 3. ZAKŁADKA KOSZE
--- ===============================================================
-
-AddButton("ZBIERZ KOSZ (RĘCZNIE)", pgKosze, function()
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
-local camera = workspace.CurrentCamera
-
-if pGui:FindFirstChild("AutoFarmGui") then pGui.AutoFarmGui:Destroy() end
-
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "AutoFarmGui"
-sgui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 220, 0, 150)
-frame.Position = UDim2.new(0.5, -110, 0.7, 0)
-frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-frame.Active = true
-frame.Draggable = true
-
--- Przycisk Manualny (to co mieliśmy wcześniej)
-local btnManual = Instance.new("TextButton", frame)
-btnManual.Size = UDim2.new(1, -20, 0, 50)
-btnManual.Position = UDim2.new(0, 10, 0, 10)
-btnManual.Text = "Następny (Ręcznie)"
-btnManual.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-btnManual.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnManual.Font = Enum.Font.SourceSansBold
-btnManual.TextSize = 16
-
--- Przycisk Auto-Farm
-local btnAuto = Instance.new("TextButton", frame)
-btnAuto.Size = UDim2.new(1, -20, 0, 50)
-btnAuto.Position = UDim2.new(0, 10, 0, 70)
-btnAuto.Text = "START AUTO-FARM"
-btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-btnAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnAuto.Font = Enum.Font.SourceSansBold
-btnAuto.TextSize = 16
-
-local index = 1
+-- LOGIKA KOSZY
+local binIndex = 1
 local kontenery = {}
 local isFarming = false
 
@@ -604,7 +463,6 @@ local function zbierzZKontenera(cel)
 
     local target = cel:FindFirstChild("Main") or cel.PrimaryPart or cel:FindFirstChildWhichIsA("BasePart")
     if target then
-        -- 1. Teleportacja i blokada kamery
         root.CFrame = target.CFrame * CFrame.new(0, 0, 3.5)
         camera.CameraType = Enum.CameraType.Scriptable
         camera.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 2, 0), target.Position)
@@ -624,267 +482,236 @@ local function zbierzZKontenera(cel)
     return false
 end
 
--- Logika Auto-Farmu
-btnAuto.MouseButton1Click:Connect(function()
+manualBinBtn.MouseButton1Click:Connect(function()
+    if isFarming then return end
+    pobierzKontenery()
+    if binIndex > #kontenery then binIndex = 1 end
+    binStatus.Text = "Przetwarzanie kosza " .. binIndex .. "/" .. #kontenery
+    zbierzZKontenera(kontenery[binIndex])
+    binIndex = binIndex + 1
+end)
+
+autoBinBtn.MouseButton1Click:Connect(function()
     if isFarming then
         isFarming = false
-        btnAuto.Text = "START AUTO-FARM"
-        btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+        autoBinBtn.Text = "⏯️ START AUTO-FARM"
+        autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+        binStatus.Text = "Auto-farm zatrzymany"
         return
     end
 
     isFarming = true
-    btnAuto.Text = "STOP AUTO-FARM"
-    btnAuto.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    autoBinBtn.Text = "⏹️ STOP AUTO-FARM"
+    autoBinBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     
     pobierzKontenery()
     
-    for i = index, #kontenery do
-        if not isFarming then break end
-        index = i
-        btnAuto.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+    coroutine.wrap(function()
+        for i = binIndex, #kontenery do
+            if not isFarming then break end
+            binIndex = i
+            binStatus.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+            
+            local sukces = zbierzZKontenera(kontenery[i])
+            if not sukces then
+                print("Pominięto kontener nr " .. i)
+            end
+            task.wait(1)
+        end
         
-        local sukces = zbierzZKontenera(kontenery[i])
-        if not sukces then
-            print("Pominięto kontener nr " .. i)
-        end
-        task.wait(1) -- Krótka przerwa między kontenerami dla bezpieczeństwa
-    end
-    
-    isFarming = false
-    btnAuto.Text = "FARM ZAKOŃCZONY"
-    btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-end)
-
--- Manualny przycisk (z poprzednich wersji)
-btnManual.MouseButton1Click:Connect(function()
-    if isFarming then return end
-    pobierzKontenery()
-    if index > #kontenery then index = 1 end
-    zbierzZKontenera(kontenery[index])
-    index = index + 1
-end)
-end)
-
-AddToggle("AUTO-FARM KOSZE", pgKosze, function(state)
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
-local camera = workspace.CurrentCamera
-
-if pGui:FindFirstChild("AutoFarmGui") then pGui.AutoFarmGui:Destroy() end
-
-local sgui = Instance.new("ScreenGui", pGui)
-sgui.Name = "AutoFarmGui"
-sgui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", sgui)
-frame.Size = UDim2.new(0, 220, 0, 150)
-frame.Position = UDim2.new(0.5, -110, 0.7, 0)
-frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-frame.Active = true
-frame.Draggable = true
-
--- Przycisk Manualny (to co mieliśmy wcześniej)
-local btnManual = Instance.new("TextButton", frame)
-btnManual.Size = UDim2.new(1, -20, 0, 50)
-btnManual.Position = UDim2.new(0, 10, 0, 10)
-btnManual.Text = "Następny (Ręcznie)"
-btnManual.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-btnManual.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnManual.Font = Enum.Font.SourceSansBold
-btnManual.TextSize = 16
-
--- Przycisk Auto-Farm
-local btnAuto = Instance.new("TextButton", frame)
-btnAuto.Size = UDim2.new(1, -20, 0, 50)
-btnAuto.Position = UDim2.new(0, 10, 0, 70)
-btnAuto.Text = "START AUTO-FARM"
-btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-btnAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnAuto.Font = Enum.Font.SourceSansBold
-btnAuto.TextSize = 16
-
-local index = 1
-local kontenery = {}
-local isFarming = false
-
-local function pobierzKontenery()
-    kontenery = {}
-    for _, nazwa in ipairs({"ContainerTonneS", "ContainerTonneG", "ContainerTonneB"}) do
-        local f = workspace:FindFirstChild(nazwa, true)
-        if f then
-            for _, k in ipairs(f:GetChildren()) do table.insert(kontenery, k) end
-        end
-    end
-end
-
-local function zbierzZKontenera(cel)
-    local char = player.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    if not root then return false end
-
-    local target = cel:FindFirstChild("Main") or cel.PrimaryPart or cel:FindFirstChildWhichIsA("BasePart")
-    if target then
-        -- 1. Teleportacja i blokada kamery
-        root.CFrame = target.CFrame * CFrame.new(0, 0, 3.5)
-        camera.CameraType = Enum.CameraType.Scriptable
-        camera.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 2, 0), target.Position)
-        
-        task.wait(0.5)
-
-        local prompt = cel:FindFirstChildWhichIsA("ProximityPrompt", true)
-        if prompt then
-            prompt:InputHoldBegin()
-            task.wait(prompt.HoldDuration + 0.3)
-            prompt:InputHoldEnd()
-            camera.CameraType = Enum.CameraType.Custom
-            return true
-        end
-    end
-    camera.CameraType = Enum.CameraType.Custom
-    return false
-end
-
--- Logika Auto-Farmu
-btnAuto.MouseButton1Click:Connect(function()
-    if isFarming then
         isFarming = false
-        btnAuto.Text = "START AUTO-FARM"
-        btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-        return
-    end
+        autoBinBtn.Text = "⏯️ START AUTO-FARM"
+        autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+        binStatus.Text = "Farm zakończony"
+    end)()
+end)
 
-    isFarming = true
-    btnAuto.Text = "STOP AUTO-FARM"
-    btnAuto.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    
-    pobierzKontenery()
-    
-    for i = index, #kontenery do
-        if not isFarming then break end
-        index = i
-        btnAuto.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+-- ==========================================
+-- ZAKŁADKA PLAYER
+-- ==========================================
+
+local playerHeader = Instance.new("TextLabel", playerTab)
+playerHeader.Size = UDim2.new(1, -20, 0, 40)
+playerHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+playerHeader.Text = "👤 USTAWIENIA GRACZA"
+playerHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+playerHeader.TextSize = 20
+playerHeader.Font = Enum.Font.GothamBold
+
+local playerHeaderCorner = Instance.new("UICorner", playerHeader)
+playerHeaderCorner.CornerRadius = UDim.new(0, 8)
+
+-- NO FALL DMG
+local noFallFrame = Instance.new("Frame", playerTab)
+noFallFrame.Size = UDim2.new(1, -20, 0, 70)
+noFallFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+
+local noFallCorner = Instance.new("UICorner", noFallFrame)
+noFallCorner.CornerRadius = UDim.new(0, 10)
+
+local noFallLabel = Instance.new("TextLabel", noFallFrame)
+noFallLabel.Size = UDim2.new(0.7, -10, 1, 0)
+noFallLabel.Position = UDim2.new(0, 10, 0, 0)
+noFallLabel.BackgroundTransparency = 1
+noFallLabel.Text = "⚡ NO FALL DAMAGE"
+noFallLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+noFallLabel.TextSize = 18
+noFallLabel.Font = Enum.Font.GothamBold
+noFallLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local noFallToggle = Instance.new("TextButton", noFallFrame)
+noFallToggle.Size = UDim2.new(0, 60, 0, 40)
+noFallToggle.Position = UDim2.new(1, -70, 0.5, -20)
+noFallToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+noFallToggle.Text = "OFF"
+noFallToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+noFallToggle.TextSize = 16
+noFallToggle.Font = Enum.Font.GothamBold
+
+local noFallToggleCorner = Instance.new("UICorner", noFallToggle)
+noFallToggleCorner.CornerRadius = UDim.new(0, 8)
+
+-- NOCLIP
+local noclipFrame = Instance.new("Frame", playerTab)
+noclipFrame.Size = UDim2.new(1, -20, 0, 70)
+noclipFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+
+local noclipCorner = Instance.new("UICorner", noclipFrame)
+noclipCorner.CornerRadius = UDim.new(0, 10)
+
+local noclipLabel = Instance.new("TextLabel", noclipFrame)
+noclipLabel.Size = UDim2.new(0.7, -10, 1, 0)
+noclipLabel.Position = UDim2.new(0, 10, 0, 0)
+noclipLabel.BackgroundTransparency = 1
+noclipLabel.Text = "🚫 NOCLIP"
+noclipLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipLabel.TextSize = 18
+noclipLabel.Font = Enum.Font.GothamBold
+noclipLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local noclipToggle = Instance.new("TextButton", noclipFrame)
+noclipToggle.Size = UDim2.new(0, 60, 0, 40)
+noclipToggle.Position = UDim2.new(1, -70, 0.5, -20)
+noclipToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+noclipToggle.Text = "OFF"
+noclipToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipToggle.TextSize = 16
+noclipToggle.Font = Enum.Font.GothamBold
+
+local noclipToggleCorner = Instance.new("UICorner", noclipToggle)
+noclipToggleCorner.CornerRadius = UDim.new(0, 8)
+
+-- FLY
+local flyFrame = Instance.new("Frame", playerTab)
+flyFrame.Size = UDim2.new(1, -20, 0, 70)
+flyFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+
+local flyCorner = Instance.new("UICorner", flyFrame)
+flyCorner.CornerRadius = UDim.new(0, 10)
+
+local flyLabel = Instance.new("TextLabel", flyFrame)
+flyLabel.Size = UDim2.new(0.7, -10, 1, 0)
+flyLabel.Position = UDim2.new(0, 10, 0, 0)
+flyLabel.BackgroundTransparency = 1
+flyLabel.Text = "🦅 FLY (klawisz X)"
+flyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyLabel.TextSize = 18
+flyLabel.Font = Enum.Font.GothamBold
+flyLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local flyToggle = Instance.new("TextButton", flyFrame)
+flyToggle.Size = UDim2.new(0, 60, 0, 40)
+flyToggle.Position = UDim2.new(1, -70, 0.5, -20)
+flyToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+flyToggle.Text = "OFF"
+flyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyToggle.TextSize = 16
+flyToggle.Font = Enum.Font.GothamBold
+
+local flyToggleCorner = Instance.new("UICorner", flyToggle)
+flyToggleCorner.CornerRadius = UDim.new(0, 8)
+
+-- SUWAK PRĘDKOŚCI LOTU
+local speedFrame = Instance.new("Frame", playerTab)
+speedFrame.Size = UDim2.new(1, -20, 0, 80)
+speedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+
+local speedCorner = Instance.new("UICorner", speedFrame)
+speedCorner.CornerRadius = UDim.new(0, 10)
+
+local speedLabel = Instance.new("TextLabel", speedFrame)
+speedLabel.Size = UDim2.new(1, -20, 0, 30)
+speedLabel.Position = UDim2.new(0, 10, 0, 5)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "PRĘDKOŚĆ LOTU: 50"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.TextSize = 16
+speedLabel.Font = Enum.Font.GothamBold
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local speedBar = Instance.new("Frame", speedFrame)
+speedBar.Size = UDim2.new(0.9, 0, 0, 10)
+speedBar.Position = UDim2.new(0.05, 0, 0, 45)
+speedBar.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+
+local speedBarCorner = Instance.new("UICorner", speedBar)
+speedBarCorner.CornerRadius = UDim.new(0, 5)
+
+local speedSlider = Instance.new("TextButton", speedBar)
+speedSlider.Size = UDim2.new(0, 20, 0, 30)
+speedSlider.Position = UDim2.new(0.14, -10, 0.5, -15)
+speedSlider.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+speedSlider.Text = ""
+
+local speedSliderCorner = Instance.new("UICorner", speedSlider)
+speedSliderCorner.CornerRadius = UDim.new(0, 10)
+
+-- ==========================================
+-- LOGIKA PLAYER
+-- ==========================================
+local noFallActive = false
+local noclipActive = false
+local flying = false
+local flySpeed = 50
+local noclipConn = nil
+local bVel = nil
+local bGyro = nil
+
+-- NO FALL DMG
+local event = game:GetService("ReplicatedStorage"):FindFirstChild("BridgeNet2") and 
+             game:GetService("ReplicatedStorage").BridgeNet2:FindFirstChild("dataRemoteEvent")
+
+local oldHook
+if event then
+    oldHook = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
         
-        local sukces = zbierzZKontenera(kontenery[i])
-        if not sukces then
-            print("Pominięto kontener nr " .. i)
+        if noFallActive and self == event and (method == "FireServer" or method == "fireServer") then
+            if args[1] and args[1][2] == "\127" and args[1][1] and args[1][1].KevArgs and args[1][1].KevArgs[1] > 20 then
+                args[1][1].KevArgs[1] = 0
+                args[1][1].KevArgs[2] = false
+                return oldHook(self, unpack(args))
+            end
         end
-        task.wait(1) -- Krótka przerwa między kontenerami dla bezpieczeństwa
-    end
-    
-    isFarming = false
-    btnAuto.Text = "FARM ZAKOŃCZONY"
-    btnAuto.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-end)
-
--- Manualny przycisk (z poprzednich wersji)
-btnManual.MouseButton1Click:Connect(function()
-    if isFarming then return end
-    pobierzKontenery()
-    if index > #kontenery then index = 1 end
-    zbierzZKontenera(kontenery[index])
-    index = index + 1
-end)
-    if state then print("Start Auto") else print("Stop Auto") end
-end)
-
--- ===============================================================
--- 4. ZAKŁADKA PLAYER
--- ===============================================================
-
-AddToggle("NO FALL DAMAGE", pgPlayer, function(state)
--- NO-FALL v12: AUTO-CLEANER (Brak konieczności resetu gry)
-
--- 1. CZYSZCZENIE: Szukamy i usuwamy poprzednie wersje skryptu
-if _G.CleanupNoFall then
-    _G.CleanupNoFall() -- Wywołujemy funkcję czyszczącą ze starej sesji
+        return oldHook(self, ...)
+    end)
 end
 
--- 2. KONFIGURACJA
-local active = false
-local event = game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
-
--- 3. GUI
-local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local F = Instance.new("Frame", SG)
-F.Size, F.Position, F.BackgroundColor3 = UDim2.new(0, 160, 0, 100), UDim2.new(0.5, -80, 0.2, 0), Color3.fromRGB(20, 20, 20)
-F.Active, F.Draggable = true, true
-
-local B = Instance.new("TextButton", F)
-B.Size, B.Position, B.Text = UDim2.new(0.9, 0, 0.4, 0), UDim2.new(0.05, 0, 0.1, 0), "GHOST: OFF"
-B.BackgroundColor3, B.TextColor3 = Color3.fromRGB(50, 50, 50), Color3.fromRGB(255, 255, 255)
-
-local X = Instance.new("TextButton", F)
-X.Size, X.Position, X.Text = UDim2.new(0.9, 0, 0.35, 0), UDim2.new(0.05, 0, 0.55, 0), "USUŃ SKRYPT"
-X.BackgroundColor3, X.TextColor3 = Color3.fromRGB(120, 0, 0), Color3.fromRGB(255, 255, 255)
-
--- 4. LOGIKA HOOKA
-local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-    local m = getnamecallmethod()
-    local a = {...}
-    
-    -- Jeśli skrypt został usunięty, przywracamy oryginalne działanie
-    if not _G.NoFallRunning then return old(self, ...) end
-    
-    if active and self == event and (m == "FireServer" or m == "fireServer") then
-        if a[1] and a[1][2] == "\127" and a[1][1].KevArgs and a[1][1].KevArgs[1] > 20 then
-            a[1][1].KevArgs[1] = 0
-            a[1][1].KevArgs[2] = false
-            return old(self, unpack(a))
-        end
-    end
-    return old(self, ...)
+noFallToggle.MouseButton1Click:Connect(function()
+    noFallActive = not noFallActive
+    noFallToggle.BackgroundColor3 = noFallActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    noFallToggle.Text = noFallActive and "ON" or "OFF"
 end)
 
--- 5. FUNKCJA CZYSZCZĄCA (To pozwala unikać resetu gry)
-_G.NoFallRunning = true
-_G.CleanupNoFall = function()
-    _G.NoFallRunning = false -- Zatrzymuje logikę hooka
-    active = false
-    SG:Destroy()
-    _G.CleanupNoFall = nil
-    print("🧹 Starsza wersja usunięta pomyślnie!")
-end
-
--- OBSŁUGA PRZYCISKÓW
-B.MouseButton1Click:Connect(function()
-    active = not active
-    B.Text = active and "GHOST: ON" or "GHOST: OFF"
-    B.BackgroundColor3 = active and Color3.fromRGB(130, 0, 130) or Color3.fromRGB(50, 50, 50)
-end)
-
-X.MouseButton1Click:Connect(function()
-    if _G.CleanupNoFall then _G.CleanupNoFall() end
-end)
-
-print("🚀 No-Fall v12 Załadowany (Auto-Clean aktywny)")
-end)
-
-AddToggle("NOCLIP", pgPlayer, function(state)
--- ==========================================
--- DODATEK DO tabPlayer: NOCLIP & FLY (WSAD+Space/Shift)
--- ==========================================
-
-local noclipActive, flying, flySpeed = false, false, 50
-local noclipConn, bVel, bGyro
-
--- 1. PRZYCISK NOCLIP
-local btnNoclip = Instance.new("TextButton", tabPlayer)
-btnNoclip.Size = UDim2.new(1, 0, 0, 50)
-btnNoclip.Text = "NOCLIP: OFF"
-btnNoclip.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-btnNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnNoclip.Font = Enum.Font.SourceSansBold
-btnNoclip.TextSize = 18
-Instance.new("UICorner", btnNoclip).CornerRadius = UDim.new(0, 6)
-
-btnNoclip.MouseButton1Click:Connect(function()
+-- NOCLIP
+noclipToggle.MouseButton1Click:Connect(function()
     noclipActive = not noclipActive
-    btnNoclip.Text = noclipActive and "NOCLIP: ON" or "NOCLIP: OFF"
-    btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    noclipToggle.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    noclipToggle.Text = noclipActive and "ON" or "OFF"
+    
     if noclipActive then
-        noclipConn = game:GetService("RunService").Stepped:Connect(function()
+        noclipConn = runService.Stepped:Connect(function()
             if noclipActive and player.Character then
                 for _, v in pairs(player.Character:GetDescendants()) do
                     if v:IsA("BasePart") then v.CanCollide = false end
@@ -902,20 +729,12 @@ btnNoclip.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. PRZYCISK FLY (KLIKALNY + KLAWISZ X)
-local btnFly = Instance.new("TextButton", tabPlayer)
-btnFly.Size = UDim2.new(1, 0, 0, 50)
-btnFly.Text = "FLY: OFF (X)"
-btnFly.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-btnFly.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnFly.Font = Enum.Font.SourceSansBold
-btnFly.TextSize = 18
-Instance.new("UICorner", btnFly).CornerRadius = UDim.new(0, 6)
-
+-- FLY
 local function toggleFly()
     flying = not flying
-    btnFly.Text = flying and "FLY: ON (X)" or "FLY: OFF (X)"
-    btnFly.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    flyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    flyToggle.Text = flying and "ON" or "OFF"
+    
     local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if flying and root then
         bVel = Instance.new("BodyVelocity", root)
@@ -930,48 +749,38 @@ local function toggleFly()
     end
 end
 
-btnFly.MouseButton1Click:Connect(toggleFly)
-game:GetService("UserInputService").InputBegan:Connect(function(i, gpe)
-    if not gpe and i.KeyCode == Enum.KeyCode.X then toggleFly() end
-end)
+flyToggle.MouseButton1Click:Connect(toggleFly)
 
--- 3. SUWAK PRĘDKOŚCI
-local sLab = Instance.new("TextLabel", tabPlayer)
-sLab.Size = UDim2.new(1, 0, 0, 25)
-sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
-sLab.TextColor3 = Color3.fromRGB(255, 255, 255)
-sLab.BackgroundTransparency = 1
-sLab.Font = Enum.Font.SourceSansBold
-
-local bar = Instance.new("Frame", tabPlayer)
-bar.Size = UDim2.new(0.9, 0, 0, 10)
-bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Instance.new("UICorner", bar)
-
-local slider = Instance.new("TextButton", bar)
-slider.Size = UDim2.new(0, 20, 0, 30)
-slider.Position = UDim2.new(0.16, -10, 0.5, -15)
-slider.Text = ""
-Instance.new("UICorner", slider)
-
-local dragging = false
-slider.MouseButton1Down:Connect(function() dragging = true end)
-game:GetService("UserInputService").InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-game:GetService("UserInputService").InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local p = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-        slider.Position = UDim2.new(p, -10, 0.5, -15)
-        flySpeed = math.floor(p * 350)
-        sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+uis.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
+        toggleFly()
     end
 end)
 
--- LOGIKA RUCHU (RenderStepped musi być w głównym skrypcie)
-game:GetService("RunService").RenderStepped:Connect(function()
+-- SUWAK
+local dragging = false
+speedSlider.MouseButton1Down:Connect(function() dragging = true end)
+
+uis.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+uis.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local pos = math.clamp((input.Position.X - speedBar.AbsolutePosition.X) / speedBar.AbsoluteSize.X, 0, 1)
+        speedSlider.Position = UDim2.new(pos, -10, 0.5, -15)
+        flySpeed = math.floor(pos * 350)
+        speedLabel.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+    end
+end)
+
+-- LOGIKA FLY
+runService.RenderStepped:Connect(function()
     if flying and bVel and bGyro then
         local dir = Vector3.new(0,0,0)
-        local cf = workspace.CurrentCamera.CFrame
-        local uis = game:GetService("UserInputService")
+        local cf = camera.CFrame
         if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
         if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
         if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
@@ -982,135 +791,53 @@ game:GetService("RunService").RenderStepped:Connect(function()
         bGyro.CFrame = cf
     end
 end)
-end)
 
-AddToggle("FLY (X)", pgPlayer, function(state)
 -- ==========================================
--- DODATEK DO tabPlayer: NOCLIP & FLY (WSAD+Space/Shift)
+-- SZYBKIE OTWIERANIE PACZEK
 -- ==========================================
-
-local noclipActive, flying, flySpeed = false, false, 50
-local noclipConn, bVel, bGyro
-
--- 1. PRZYCISK NOCLIP
-local btnNoclip = Instance.new("TextButton", tabPlayer)
-btnNoclip.Size = UDim2.new(1, 0, 0, 50)
-btnNoclip.Text = "NOCLIP: OFF"
-btnNoclip.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-btnNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnNoclip.Font = Enum.Font.SourceSansBold
-btnNoclip.TextSize = 18
-Instance.new("UICorner", btnNoclip).CornerRadius = UDim.new(0, 6)
-
-btnNoclip.MouseButton1Click:Connect(function()
-    noclipActive = not noclipActive
-    btnNoclip.Text = noclipActive and "NOCLIP: ON" or "NOCLIP: OFF"
-    btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-    if noclipActive then
-        noclipConn = game:GetService("RunService").Stepped:Connect(function()
-            if noclipActive and player.Character then
-                for _, v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if noclipConn then noclipConn:Disconnect() end
-        task.wait(0.1)
-        if player.Character then
-            for _, v in pairs(player.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = true end
-            end
+quickBtn.MouseButton1Click:Connect(function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local backpack = player:WaitForChild("Backpack")
+    
+    local found = 0
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
+            hum:EquipTool(item)
+            found = found + 1
+            task.wait(0.02)
         end
     end
+    
+    local oldText = quickBtn.Text
+    quickBtn.Text = "✓ PRZENIESIONO: " .. found
+    quickBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+    task.wait(1)
+    quickBtn.Text = oldText
+    quickBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 end)
 
--- 2. PRZYCISK FLY (KLIKALNY + KLAWISZ X)
-local btnFly = Instance.new("TextButton", tabPlayer)
-btnFly.Size = UDim2.new(1, 0, 0, 50)
-btnFly.Text = "FLY: OFF (X)"
-btnFly.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-btnFly.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnFly.Font = Enum.Font.SourceSansBold
-btnFly.TextSize = 18
-Instance.new("UICorner", btnFly).CornerRadius = UDim.new(0, 6)
-
-local function toggleFly()
-    flying = not flying
-    btnFly.Text = flying and "FLY: ON (X)" or "FLY: OFF (X)"
-    btnFly.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if flying and root then
-        bVel = Instance.new("BodyVelocity", root)
-        bVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-        bGyro = Instance.new("BodyGyro", root)
-        bGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
-        player.Character.Humanoid.PlatformStand = true
-    else
-        if bVel then bVel:Destroy() end
-        if bGyro then bGyro:Destroy() end
-        if player.Character then player.Character.Humanoid.PlatformStand = false end
-    end
-end
-
-btnFly.MouseButton1Click:Connect(toggleFly)
-game:GetService("UserInputService").InputBegan:Connect(function(i, gpe)
-    if not gpe and i.KeyCode == Enum.KeyCode.X then toggleFly() end
-end)
-
--- 3. SUWAK PRĘDKOŚCI
-local sLab = Instance.new("TextLabel", tabPlayer)
-sLab.Size = UDim2.new(1, 0, 0, 25)
-sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
-sLab.TextColor3 = Color3.fromRGB(255, 255, 255)
-sLab.BackgroundTransparency = 1
-sLab.Font = Enum.Font.SourceSansBold
-
-local bar = Instance.new("Frame", tabPlayer)
-bar.Size = UDim2.new(0.9, 0, 0, 10)
-bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Instance.new("UICorner", bar)
-
-local slider = Instance.new("TextButton", bar)
-slider.Size = UDim2.new(0, 20, 0, 30)
-slider.Position = UDim2.new(0.16, -10, 0.5, -15)
-slider.Text = ""
-Instance.new("UICorner", slider)
-
-local dragging = false
-slider.MouseButton1Down:Connect(function() dragging = true end)
-game:GetService("UserInputService").InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-game:GetService("UserInputService").InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local p = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-        slider.Position = UDim2.new(p, -10, 0.5, -15)
-        flySpeed = math.floor(p * 350)
-        sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+-- ==========================================
+-- UKRYWANIE PRAWYM SHIFTEM
+-- ==========================================
+local guiVisible = true
+uis.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
+        guiVisible = not guiVisible
+        mainFrame.Visible = guiVisible
+        hideBtn.Text = guiVisible and "👁️" or "👁️‍🗨️"
     end
 end)
 
--- LOGIKA RUCHU (RenderStepped musi być w głównym skrypcie)
-game:GetService("RunService").RenderStepped:Connect(function()
-    if flying and bVel and bGyro then
-        local dir = Vector3.new(0,0,0)
-        local cf = workspace.CurrentCamera.CFrame
-        local uis = game:GetService("UserInputService")
-        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
-        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
-        bVel.Velocity = dir * flySpeed
-        bGyro.CFrame = cf
-    end
-end)
+hideBtn.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    mainFrame.Visible = guiVisible
+    hideBtn.Text = guiVisible and "👁️" or "👁️‍🗨️"
 end)
 
--- PRZYKŁAD SUWAKA (Makieta)
-local sliderLabel = Instance.new("TextLabel", pgPlayer)
-sliderLabel.Size = UDim2.new(1, 0, 0, 30)
-sliderLabel.Text = "PRĘDKOŚĆ LOTU"
-sliderLabel.TextColor3 = Color3.fromRGB(255,255,255)
-sliderLabel.BackgroundTransparency = 1
-sliderLabel.Font = Enum.Font.SourceSansBold
+-- AKTYWUJ PIERWSZĄ ZAKŁADKĘ
+tabsList[1].BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+tabsList[1].TextColor3 = Color3.fromRGB(255, 255, 255)
+tabContents["PACZKI"].Visible = true
+
+print("✅ Multi-Tool V2 załadowany! Ukryj/pokaż: Prawy Shift")
