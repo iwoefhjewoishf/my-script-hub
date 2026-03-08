@@ -15,8 +15,8 @@ sgui.ResetOnSpawn = false
 
 -- 2. GŁÓWNA RAMKA (Czarna, draggable)
 local mainFrame = Instance.new("Frame", sgui)
-mainFrame.Size = UDim2.new(0, 320, 0, 450)
-mainFrame.Position = UDim2.new(0.5, -160, 0.2, 0)
+mainFrame.Size = UDim2.new(0, 340, 0, 480) -- Lekko powiększyłem ramkę na większe napisy
+mainFrame.Position = UDim2.new(0.5, -170, 0.2, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -25,19 +25,19 @@ Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
 
 -- Tytuł
 local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Size = UDim2.new(1, 0, 0, 35)
 title.Text = "  MEGA HUB (Zwiń: Prawy Shift)"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 title.Font = Enum.Font.SourceSansBold
-title.TextSize = 16
+title.TextSize = 18 -- WIĘKSZY TEKST
 title.TextXAlignment = Enum.TextXAlignment.Left
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 8)
 
 -- 3. ZARZĄDZANIE ZAKŁADKAMI
 local tabContainer = Instance.new("Frame", mainFrame)
-tabContainer.Size = UDim2.new(1, -10, 0, 30)
-tabContainer.Position = UDim2.new(0, 5, 0, 35)
+tabContainer.Size = UDim2.new(1, -10, 0, 35)
+tabContainer.Position = UDim2.new(0, 5, 0, 40)
 tabContainer.BackgroundTransparency = 1
 
 local tabLayout = Instance.new("UIListLayout", tabContainer)
@@ -46,8 +46,8 @@ tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 tabLayout.Padding = UDim.new(0, 5)
 
 local contentContainer = Instance.new("Frame", mainFrame)
-contentContainer.Size = UDim2.new(1, -10, 1, -75)
-contentContainer.Position = UDim2.new(0, 5, 0, 70)
+contentContainer.Size = UDim2.new(1, -10, 1, -85)
+contentContainer.Position = UDim2.new(0, 5, 0, 80)
 contentContainer.BackgroundTransparency = 1
 
 local frames = {}
@@ -60,7 +60,7 @@ local function createTab(name, order)
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 14
+    btn.TextSize = 16 -- WIĘKSZY TEKST
     btn.LayoutOrder = order
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
     
@@ -85,11 +85,9 @@ local tabTepeki = createTab("TEPEKI", 2)
 local tabKosze = createTab("KOSZE", 3)
 local tabPlayer = createTab("PLAYER", 4)
 
--- Pokaż pierwszą zakładkę na start
 frames["PACZKI"].Visible = true
 buttons["PACZKI"].BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 
--- CHOWANIE POD PRAWYM SHIFTEM
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
         mainFrame.Visible = not mainFrame.Visible
@@ -100,12 +98,12 @@ end)
 -- ZAKŁADKA 1: PACZKI
 -- ==========================================
 local btnSort = Instance.new("TextButton", tabPaczki)
-btnSort.Size = UDim2.new(1, 0, 0, 40)
+btnSort.Size = UDim2.new(1, 0, 0, 45)
 btnSort.Text = "SZYBKIE OTWIERANIE (Wrzuca na pasek)"
 btnSort.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 btnSort.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnSort.Font = Enum.Font.SourceSansBold
-btnSort.TextSize = 14
+btnSort.TextSize = 18 -- WIĘKSZY TEKST
 Instance.new("UICorner", btnSort).CornerRadius = UDim.new(0, 6)
 
 btnSort.MouseButton1Click:Connect(function()
@@ -127,14 +125,13 @@ btnSort.MouseButton1Click:Connect(function()
 end)
 
 local paczkiScroll = Instance.new("ScrollingFrame", tabPaczki)
-paczkiScroll.Size = UDim2.new(1, 0, 1, -45)
-paczkiScroll.Position = UDim2.new(0, 0, 0, 45)
+paczkiScroll.Size = UDim2.new(1, 0, 1, -50)
+paczkiScroll.Position = UDim2.new(0, 0, 0, 50)
 paczkiScroll.BackgroundTransparency = 1
 paczkiScroll.ScrollBarThickness = 4
 local paczkiLayout = Instance.new("UIListLayout", paczkiScroll)
 paczkiLayout.Padding = UDim.new(0, 5)
 
--- Logika farmy paczek
 local function applyFast(v) if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end end
 workspace.DescendantAdded:Connect(applyFast)
 for _, v in ipairs(workspace:GetDescendants()) do applyFast(v) end
@@ -205,11 +202,12 @@ local lokacjePaczki = {
 }
 for _, dane in ipairs(lokacjePaczki) do
     local b = Instance.new("TextButton", paczkiScroll)
-    b.Size = UDim2.new(1, -10, 0, 35)
+    b.Size = UDim2.new(1, -10, 0, 40)
     b.Text = dane.nazwa
     b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 18 -- WIĘKSZY TEKST
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
     b.MouseButton1Click:Connect(function()
         local root = player.Character.HumanoidRootPart
@@ -244,11 +242,12 @@ local lokacjeTep = {
 }
 for _, dane in ipairs(lokacjeTep) do
     local b = Instance.new("TextButton", tepScroll)
-    b.Size = UDim2.new(1, -10, 0, 35)
+    b.Size = UDim2.new(1, -10, 0, 40)
     b.Text = dane.nazwa
     b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 18 -- WIĘKSZY TEKST
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
     b.MouseButton1Click:Connect(function()
         local char = player.Character
@@ -273,17 +272,17 @@ btnManual.Text = "NASTĘPNY KOSZ (Ręcznie)"
 btnManual.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 btnManual.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnManual.Font = Enum.Font.SourceSansBold
-btnManual.TextSize = 16
+btnManual.TextSize = 18 -- WIĘKSZY TEKST
 Instance.new("UICorner", btnManual).CornerRadius = UDim.new(0, 6)
 
 local btnAutoKosz = Instance.new("TextButton", tabKosze)
 btnAutoKosz.Size = UDim2.new(1, 0, 0, 50)
 btnAutoKosz.Position = UDim2.new(0, 0, 0, 60)
 btnAutoKosz.Text = "AUTO-FARM KOSZE: OFF"
-btnAutoKosz.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- Czerwony na start
+btnAutoKosz.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 btnAutoKosz.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnAutoKosz.Font = Enum.Font.SourceSansBold
-btnAutoKosz.TextSize = 16
+btnAutoKosz.TextSize = 18 -- WIĘKSZY TEKST
 Instance.new("UICorner", btnAutoKosz).CornerRadius = UDim.new(0, 6)
 
 local indexKosze = 1
@@ -327,7 +326,7 @@ btnAutoKosz.MouseButton1Click:Connect(function()
     isFarmingKosze = not isFarmingKosze
     if isFarmingKosze then
         btnAutoKosz.Text = "AUTO-FARM KOSZE: ON"
-        btnAutoKosz.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- Zielony
+        btnAutoKosz.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
         pobierzKontenery()
         for i = indexKosze, #kontenery do
             if not isFarmingKosze then break end
@@ -359,10 +358,10 @@ end)
 local btnNoFall = Instance.new("TextButton", tabPlayer)
 btnNoFall.Size = UDim2.new(1, 0, 0, 50)
 btnNoFall.Text = "NO FALL DAMAGE: OFF"
-btnNoFall.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- Czerwony na start
+btnNoFall.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 btnNoFall.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnNoFall.Font = Enum.Font.SourceSansBold
-btnNoFall.TextSize = 16
+btnNoFall.TextSize = 18 -- WIĘKSZY TEKST
 Instance.new("UICorner", btnNoFall).CornerRadius = UDim.new(0, 6)
 
 local activeNoFall = false
@@ -394,9 +393,9 @@ btnNoFall.MouseButton1Click:Connect(function()
     activeNoFall = not activeNoFall
     if activeNoFall then
         btnNoFall.Text = "NO FALL DAMAGE: ON"
-        btnNoFall.BackgroundColor3 = Color3.fromRGB(0, 150, 0) -- Zielony
+        btnNoFall.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     else
         btnNoFall.Text = "NO FALL DAMAGE: OFF"
-        btnNoFall.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- Czerwony
+        btnNoFall.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
     end
 end)
