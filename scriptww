@@ -1,6 +1,6 @@
 --[[
     ULTIMATE MULTI-TOOL V2 (Kompaktowy)
-    Kolejność: PLAYER > TP > PACZKI > KOSZE
+    Kolejność: PLAYER > TP > MISC > PACZKI > KOSZE
 ]]
 
 local Players = game:GetService("Players")
@@ -24,7 +24,7 @@ sgui.DisplayOrder = 999
 
 -- GŁÓWNA RAMKA
 local mainFrame = Instance.new("Frame", sgui)
-mainFrame.Size = UDim2.new(0, 500, 0, 400)
+mainFrame.Size = UDim2.new(0, 500, 0, 450) -- Trochę większe dla nowej zakładki
 mainFrame.Position = UDim2.new(0.5, -250, 0.3, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderSizePixel = 0
@@ -103,7 +103,7 @@ contentCorner.CornerRadius = UDim.new(0, 10)
 -- FUNKCJA TWORZENIA ZAKŁADKI
 local function createTab(name, icon)
     local tab = Instance.new("TextButton", tabs)
-    tab.Size = UDim2.new(0, 90, 1, 0)
+    tab.Size = UDim2.new(0, 80, 1, 0) -- Trochę węższe żeby zmieścić 5 zakładek
     tab.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
     tab.Text = icon .. " " .. name
     tab.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -150,16 +150,207 @@ local function createTab(name, icon)
     return container
 end
 
--- TWORZENIE ZAKŁADEK (ZMIENIONA KOLEJNOŚĆ)
+-- TWORZENIE ZAKŁADEK (NOWA KOLEJNOŚĆ Z MISC)
 local playerTab = createTab("PLAYER", "👤")     -- 1. Player
 local teleportsTab = createTab("TP", "🌍")      -- 2. Teleporty
-local packagesTab = createTab("PACZKI", "📦")   -- 3. Paczki
-local binsTab = createTab("KOSZE", "🗑️")        -- 4. Kosze
+local miscTab = createTab("MISC", "⚙️")         -- 3. MISC (nowa zakładka)
+local packagesTab = createTab("PACZKI", "📦")   -- 4. Paczki
+local binsTab = createTab("KOSZE", "🗑️")        -- 5. Kosze
+
+-- ==========================================
+-- ZAKŁADKA MISC (AUTO COLLECT / DRILL)
+-- ==========================================
+
+local miscHeader = Instance.new("TextLabel", miscTab)
+miscHeader.Size = UDim2.new(1, -10, 0, 30)
+miscHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+miscHeader.Text = "⚙️ AUTO COLLECT / DRILL"
+miscHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+miscHeader.TextSize = 14
+miscHeader.Font = Enum.Font.GothamBold
+
+local miscHeaderCorner = Instance.new("UICorner", miscHeader)
+miscHeaderCorner.CornerRadius = UDim.new(0, 6)
+
+-- AUTO COLLECT (E)
+local collectBtn = Instance.new("TextButton", miscTab)
+collectBtn.Size = UDim2.new(1, -10, 0, 45)
+collectBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+collectBtn.Text = "📦 AUTO COLLECT: OFF"
+collectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+collectBtn.TextSize = 14
+collectBtn.Font = Enum.Font.GothamBold
+
+local collectCorner = Instance.new("UICorner", collectBtn)
+collectCorner.CornerRadius = UDim.new(0, 8)
+
+-- FAST COLLECT
+local fastBtn = Instance.new("TextButton", miscTab)
+fastBtn.Size = UDim2.new(1, -10, 0, 45)
+fastBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+fastBtn.Text = "⚡ FAST COLLECT: OFF"
+fastBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fastBtn.TextSize = 14
+fastBtn.Font = Enum.Font.GothamBold
+
+local fastCorner = Instance.new("UICorner", fastBtn)
+fastCorner.CornerRadius = UDim.new(0, 8)
+
+-- AUTO DRILL (F)
+local drillBtn = Instance.new("TextButton", miscTab)
+drillBtn.Size = UDim2.new(1, -10, 0, 45)
+drillBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+drillBtn.Text = "🔧 AUTO DRILL: OFF"
+drillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+drillBtn.TextSize = 14
+drillBtn.Font = Enum.Font.GothamBold
+
+local drillCorner = Instance.new("UICorner", drillBtn)
+drillCorner.CornerRadius = UDim.new(0, 8)
+
+-- Status
+local miscStatus = Instance.new("TextLabel", miscTab)
+miscStatus.Size = UDim2.new(1, -10, 0, 30)
+miscStatus.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+miscStatus.Text = "Gotowy"
+miscStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+miscStatus.TextSize = 12
+miscStatus.Font = Enum.Font.Gotham
+
+local miscStatusCorner = Instance.new("UICorner", miscStatus)
+miscStatusCorner.CornerRadius = UDim.new(0, 6)
+
+-- Zmienne dla MISC
+local collectActive = false
+local fastActive = false
+local drillActive = false
+local lastCollect = 0
+local lastDrill = 0
+local collectLoop = nil
+local drillLoop = nil
+local fastConnection = nil
+
+-- Kliknięcie
+local function click(key)
+    vim:SendKeyEvent(true, key, false, game)
+    task.wait(0.02)
+    vim:SendKeyEvent(false, key, false, game)
+end
+
+-- FAST COLLECT
+local function makeFast(inst)
+    if fastActive and inst:IsA("ProximityPrompt") then
+        inst.HoldDuration = 0
+    end
+end
+
+-- Pętla Collect (lekka)
+local function startCollectLoop()
+    collectLoop = coroutine.wrap(function()
+        while collectActive do
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.E then
+                            local dist = (root.Position - obj.Parent.Position).Magnitude
+                            if dist < 15 and (tick() - lastCollect > 0.2) then
+                                lastCollect = tick()
+                                click(Enum.KeyCode.E)
+                                miscStatus.Text = "Zbieram..."
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+        miscStatus.Text = "Collect wyłączony"
+    end)
+    collectLoop()
+end
+
+-- Pętla Drill (rzadziej)
+local function startDrillLoop()
+    drillLoop = coroutine.wrap(function()
+        while drillActive do
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.F then
+                            local dist = (root.Position - obj.Parent.Position).Magnitude
+                            if dist < 15 and (tick() - lastDrill > 1.5) then
+                                lastDrill = tick()
+                                click(Enum.KeyCode.F)
+                                miscStatus.Text = "Drilluję..."
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.5)
+        end
+        miscStatus.Text = "Drill wyłączony"
+    end)
+    drillLoop()
+end
+
+-- Collect button
+collectBtn.MouseButton1Click:Connect(function()
+    collectActive = not collectActive
+    collectBtn.BackgroundColor3 = collectActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    collectBtn.Text = collectActive and "📦 AUTO COLLECT: ON" or "📦 AUTO COLLECT: OFF"
+    
+    if collectActive then
+        startCollectLoop()
+        miscStatus.Text = "Collect włączony"
+    else
+        miscStatus.Text = "Collect wyłączony"
+    end
+end)
+
+-- Fast button
+fastBtn.MouseButton1Click:Connect(function()
+    fastActive = not fastActive
+    fastBtn.BackgroundColor3 = fastActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    fastBtn.Text = fastActive and "⚡ FAST COLLECT: ON" or "⚡ FAST COLLECT: OFF"
+    
+    if fastActive then
+        for _, v in ipairs(workspace:GetDescendants()) do
+            makeFast(v)
+        end
+        fastConnection = workspace.DescendantAdded:Connect(makeFast)
+        miscStatus.Text = "Fast włączony"
+    else
+        if fastConnection then
+            fastConnection:Disconnect()
+            fastConnection = nil
+        end
+        miscStatus.Text = "Fast wyłączony"
+    end
+end)
+
+-- Drill button
+drillBtn.MouseButton1Click:Connect(function()
+    drillActive = not drillActive
+    drillBtn.BackgroundColor3 = drillActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    drillBtn.Text = drillActive and "🔧 AUTO DRILL: ON" or "🔧 AUTO DRILL: OFF"
+    
+    if drillActive then
+        startDrillLoop()
+        miscStatus.Text = "Drill włączony"
+    else
+        miscStatus.Text = "Drill wyłączony"
+    end
+end)
 
 -- ==========================================
 -- ZAKŁADKA PLAYER (bez zmian)
 -- ==========================================
-
+-- [Tutaj cały kod PLAYER z poprzedniej wersji - zachowujemy bez zmian]
 local playerHeader = Instance.new("TextLabel", playerTab)
 playerHeader.Size = UDim2.new(1, -10, 0, 30)
 playerHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
@@ -293,9 +484,134 @@ local speedSliderCorner = Instance.new("UICorner", speedSlider)
 speedSliderCorner.CornerRadius = UDim.new(0, 8)
 
 -- ==========================================
--- ZAKŁADKA TELEPORTY
+-- LOGIKA PLAYER (bez zmian)
 -- ==========================================
+local noFallActive = false
+local noclipActive = false
+local flying = false
+local flySpeed = 50
+local noclipConn = nil
+local bVel = nil
+local bGyro = nil
 
+-- NO FALL DMG
+local event = game:GetService("ReplicatedStorage"):FindFirstChild("BridgeNet2") and 
+             game:GetService("ReplicatedStorage").BridgeNet2:FindFirstChild("dataRemoteEvent")
+
+local oldHook
+if event then
+    oldHook = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+        
+        if noFallActive and self == event and (method == "FireServer" or method == "fireServer") then
+            if args[1] and args[1][2] == "\127" and args[1][1] and args[1][1].KevArgs and args[1][1].KevArgs[1] > 20 then
+                args[1][1].KevArgs[1] = 0
+                args[1][1].KevArgs[2] = false
+                return oldHook(self, unpack(args))
+            end
+        end
+        return oldHook(self, ...)
+    end)
+end
+
+noFallToggle.MouseButton1Click:Connect(function()
+    noFallActive = not noFallActive
+    noFallToggle.BackgroundColor3 = noFallActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    noFallToggle.Text = noFallActive and "ON" or "OFF"
+end)
+
+-- NOCLIP
+noclipToggle.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    noclipToggle.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    noclipToggle.Text = noclipActive and "ON" or "OFF"
+    
+    if noclipActive then
+        noclipConn = runService.Stepped:Connect(function()
+            if noclipActive and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
+        task.wait(0.1)
+        if player.Character then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = true end
+            end
+        end
+    end
+end)
+
+-- FLY
+local function toggleFly()
+    flying = not flying
+    flyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    flyToggle.Text = flying and "ON" or "OFF"
+    
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if flying and root then
+        bVel = Instance.new("BodyVelocity", root)
+        bVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bGyro = Instance.new("BodyGyro", root)
+        bGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+        player.Character.Humanoid.PlatformStand = true
+    else
+        if bVel then bVel:Destroy() end
+        if bGyro then bGyro:Destroy() end
+        if player.Character then player.Character.Humanoid.PlatformStand = false end
+    end
+end
+
+flyToggle.MouseButton1Click:Connect(toggleFly)
+
+uis.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
+        toggleFly()
+    end
+end)
+
+-- SUWAK
+local dragging = false
+speedSlider.MouseButton1Down:Connect(function() dragging = true end)
+
+uis.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+uis.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local pos = math.clamp((input.Position.X - speedBar.AbsolutePosition.X) / speedBar.AbsoluteSize.X, 0, 1)
+        speedSlider.Position = UDim2.new(pos, -8, 0.5, -12)
+        flySpeed = math.floor(pos * 350)
+        speedLabel.Text = "PRĘDKOŚĆ: " .. flySpeed
+    end
+end)
+
+-- LOGIKA FLY
+runService.RenderStepped:Connect(function()
+    if flying and bVel and bGyro then
+        local dir = Vector3.new(0,0,0)
+        local cf = camera.CFrame
+        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+        bVel.Velocity = dir * flySpeed
+        bGyro.CFrame = cf
+    end
+end)
+
+-- ==========================================
+-- ZAKŁADKA TELEPORTY (bez zmian)
+-- ==========================================
 local tpHeader = Instance.new("TextLabel", teleportsTab)
 tpHeader.Size = UDim2.new(1, -10, 0, 30)
 tpHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
@@ -356,7 +672,6 @@ end
 -- ==========================================
 -- ZAKŁADKA PACZKI (TYLKO TELEPORTY)
 -- ==========================================
-
 local packagesHeader = Instance.new("TextLabel", packagesTab)
 packagesHeader.Size = UDim2.new(1, -10, 0, 30)
 packagesHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
@@ -377,7 +692,6 @@ packagesGridLayout.FillDirection = Enum.FillDirection.Horizontal
 packagesGridLayout.CellSize = UDim2.new(0, 90, 0, 45)
 packagesGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 
--- LOKACJE PAKSTATIONS
 local packLokacje = {
     {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
     {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
@@ -390,7 +704,6 @@ local packLokacje = {
     {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
 }
 
--- TWORZENIE PRZYCISKÓW (TYLKO TELEPORT)
 for _, dane in ipairs(packLokacje) do
     local btn = Instance.new("TextButton", packagesGrid)
     btn.Size = UDim2.new(1, 0, 1, 0)
@@ -419,7 +732,6 @@ end
 -- ==========================================
 -- ZAKŁADKA KOSZE (bez zmian)
 -- ==========================================
-
 local binsHeader = Instance.new("TextLabel", binsTab)
 binsHeader.Size = UDim2.new(1, -10, 0, 30)
 binsHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
@@ -550,132 +862,6 @@ autoBinBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- LOGIKA PLAYER (bez zmian)
--- ==========================================
-local noFallActive = false
-local noclipActive = false
-local flying = false
-local flySpeed = 50
-local noclipConn = nil
-local bVel = nil
-local bGyro = nil
-
--- NO FALL DMG
-local event = game:GetService("ReplicatedStorage"):FindFirstChild("BridgeNet2") and 
-             game:GetService("ReplicatedStorage").BridgeNet2:FindFirstChild("dataRemoteEvent")
-
-local oldHook
-if event then
-    oldHook = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        local args = {...}
-        
-        if noFallActive and self == event and (method == "FireServer" or method == "fireServer") then
-            if args[1] and args[1][2] == "\127" and args[1][1] and args[1][1].KevArgs and args[1][1].KevArgs[1] > 20 then
-                args[1][1].KevArgs[1] = 0
-                args[1][1].KevArgs[2] = false
-                return oldHook(self, unpack(args))
-            end
-        end
-        return oldHook(self, ...)
-    end)
-end
-
-noFallToggle.MouseButton1Click:Connect(function()
-    noFallActive = not noFallActive
-    noFallToggle.BackgroundColor3 = noFallActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-    noFallToggle.Text = noFallActive and "ON" or "OFF"
-end)
-
--- NOCLIP
-noclipToggle.MouseButton1Click:Connect(function()
-    noclipActive = not noclipActive
-    noclipToggle.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-    noclipToggle.Text = noclipActive and "ON" or "OFF"
-    
-    if noclipActive then
-        noclipConn = runService.Stepped:Connect(function()
-            if noclipActive and player.Character then
-                for _, v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if noclipConn then noclipConn:Disconnect() end
-        task.wait(0.1)
-        if player.Character then
-            for _, v in pairs(player.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = true end
-            end
-        end
-    end
-end)
-
--- FLY
-local function toggleFly()
-    flying = not flying
-    flyToggle.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
-    flyToggle.Text = flying and "ON" or "OFF"
-    
-    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if flying and root then
-        bVel = Instance.new("BodyVelocity", root)
-        bVel.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-        bGyro = Instance.new("BodyGyro", root)
-        bGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
-        player.Character.Humanoid.PlatformStand = true
-    else
-        if bVel then bVel:Destroy() end
-        if bGyro then bGyro:Destroy() end
-        if player.Character then player.Character.Humanoid.PlatformStand = false end
-    end
-end
-
-flyToggle.MouseButton1Click:Connect(toggleFly)
-
-uis.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.X then
-        toggleFly()
-    end
-end)
-
--- SUWAK
-local dragging = false
-speedSlider.MouseButton1Down:Connect(function() dragging = true end)
-
-uis.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-uis.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local pos = math.clamp((input.Position.X - speedBar.AbsolutePosition.X) / speedBar.AbsoluteSize.X, 0, 1)
-        speedSlider.Position = UDim2.new(pos, -8, 0.5, -12)
-        flySpeed = math.floor(pos * 350)
-        speedLabel.Text = "PRĘDKOŚĆ: " .. flySpeed
-    end
-end)
-
--- LOGIKA FLY
-runService.RenderStepped:Connect(function()
-    if flying and bVel and bGyro then
-        local dir = Vector3.new(0,0,0)
-        local cf = camera.CFrame
-        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
-        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
-        bVel.Velocity = dir * flySpeed
-        bGyro.CFrame = cf
-    end
-end)
-
--- ==========================================
 -- UKRYWANIE PRAWYM SHIFTEM
 -- ==========================================
 local guiVisible = true
@@ -693,4 +879,11 @@ hideBtn.MouseButton1Click:Connect(function()
     hideBtn.Text = guiVisible and "👁️" or "👁️‍🗨️"
 end)
 
--- AKTYWU
+-- AKTYWUJ PIERWSZĄ ZAKŁADKĘ (PLAYER) - POPRAWIONE!
+tabsList[1].BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+tabsList[1].TextColor3 = Color3.fromRGB(255, 255, 255)
+tabContents["PLAYER"].Visible = true
+
+print("✅ Multi-Tool załadowany! Kolejność: PLAYER > TP > MISC > PACZKI > KOSZE")
+print("📌 Domyślnie otwarta zakładka PLAYER")
+print("⚙️ Nowa zakładka MISC z auto collect/drill")
