@@ -1,8 +1,6 @@
 --[[
-    ULTIMATE MULTI-TOOL V2
-    Nowoczesne GUI z zakładkami
-    Ukrywanie: Prawy Shift
-    Przeciąganie: Lewy przycisk myszy
+    ULTIMATE MULTI-TOOL V2 (Kompaktowy)
+    Mniejszy rozmiar, wszystko czytelne
 ]]
 
 local Players = game:GetService("Players")
@@ -24,20 +22,20 @@ sgui.ResetOnSpawn = false
 sgui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sgui.DisplayOrder = 999
 
--- GŁÓWNA RAMKA
+-- GŁÓWNA RAMKA (MNIEJSZA)
 local mainFrame = Instance.new("Frame", sgui)
-mainFrame.Size = UDim2.new(0, 700, 0, 550)
-mainFrame.Position = UDim2.new(0.5, -350, 0.3, -150)
+mainFrame.Size = UDim2.new(0, 500, 0, 400)  -- Zmniejszone z 700x550
+mainFrame.Position = UDim2.new(0.5, -250, 0.3, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Visible = true
 
--- Cienie i efekty
+-- Cień
 local shadow = Instance.new("ImageLabel", mainFrame)
-shadow.Size = UDim2.new(1, 40, 1, 40)
-shadow.Position = UDim2.new(0, -20, 0, -20)
+shadow.Size = UDim2.new(1, 30, 1, 30)
+shadow.Position = UDim2.new(0, -15, 0, -15)
 shadow.BackgroundTransparency = 1
 shadow.Image = "rbxassetid://1316045217"
 shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
@@ -45,79 +43,79 @@ shadow.ImageTransparency = 0.5
 shadow.ZIndex = -1
 
 local corner = Instance.new("UICorner", mainFrame)
-corner.CornerRadius = UDim.new(0, 12)
+corner.CornerRadius = UDim.new(0, 10)
 
--- NAGŁÓWEK
+-- NAGŁÓWEK (MNIEJSZY)
 local header = Instance.new("Frame", mainFrame)
-header.Size = UDim2.new(1, 0, 0, 50)
+header.Size = UDim2.new(1, 0, 0, 40)  -- Zmniejszone z 50
 header.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 header.BorderSizePixel = 0
 
 local headerCorner = Instance.new("UICorner", header)
-headerCorner.CornerRadius = UDim.new(0, 12)
+headerCorner.CornerRadius = UDim.new(0, 10)
 
 local title = Instance.new("TextLabel", header)
-title.Size = UDim2.new(1, -50, 1, 0)
-title.Position = UDim2.new(0, 20, 0, 0)
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "⚡ MULTI-TOOL V2 ⚡"
+title.Text = "⚡ MULTI-TOOL ⚡"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 24
+title.TextSize = 20  -- Mniejsza czcionka
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local hideBtn = Instance.new("TextButton", header)
-hideBtn.Size = UDim2.new(0, 40, 0, 40)
-hideBtn.Position = UDim2.new(1, -45, 0, 5)
+hideBtn.Size = UDim2.new(0, 30, 0, 30)  -- Mniejszy
+hideBtn.Position = UDim2.new(1, -35, 0, 5)
 hideBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
 hideBtn.Text = "👁️"
 hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-hideBtn.TextSize = 20
+hideBtn.TextSize = 16
 hideBtn.Font = Enum.Font.GothamBold
 
 local hideCorner = Instance.new("UICorner", hideBtn)
-hideCorner.CornerRadius = UDim.new(0, 8)
+hideCorner.CornerRadius = UDim.new(0, 6)
 
--- ZAKŁADKI
+-- ZAKŁADKI (MNIEJSZE)
 local tabs = Instance.new("Frame", mainFrame)
-tabs.Size = UDim2.new(1, -40, 0, 50)
-tabs.Position = UDim2.new(0, 20, 0, 70)
+tabs.Size = UDim2.new(1, -30, 0, 40)  -- Węższe
+tabs.Position = UDim2.new(0, 15, 0, 50)
 tabs.BackgroundTransparency = 1
 
 local tabLayout = Instance.new("UIListLayout", tabs)
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 10)
+tabLayout.Padding = UDim.new(0, 5)
 tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
 local tabsList = {}
 local tabContents = {}
 
--- KONTENER NA TREŚĆ ZAKŁADEK
+-- KONTENER NA TREŚĆ (MNIEJSZY)
 local contentFrame = Instance.new("Frame", mainFrame)
-contentFrame.Size = UDim2.new(1, -40, 1, -140)
-contentFrame.Position = UDim2.new(0, 20, 0, 130)
+contentFrame.Size = UDim2.new(1, -30, 1, -100)  -- Dopasowane
+contentFrame.Position = UDim2.new(0, 15, 0, 95)
 contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 contentFrame.BorderSizePixel = 0
 
 local contentCorner = Instance.new("UICorner", contentFrame)
-contentCorner.CornerRadius = UDim.new(0, 12)
+contentCorner.CornerRadius = UDim.new(0, 10)
 
--- FUNKCJA TWORZENIA ZAKŁADKI
+-- FUNKCJA TWORZENIA ZAKŁADKI (MNIEJSZE)
 local function createTab(name, icon)
     local tab = Instance.new("TextButton", tabs)
-    tab.Size = UDim2.new(0, 120, 1, 0)
+    tab.Size = UDim2.new(0, 90, 1, 0)  -- Węższe
     tab.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-    tab.Text = icon .. "  " .. name
+    tab.Text = icon .. " " .. name
     tab.TextColor3 = Color3.fromRGB(180, 180, 180)
-    tab.TextSize = 16
+    tab.TextSize = 14  -- Mniejsza czcionka
     tab.Font = Enum.Font.GothamBold
     
     local tabCorner = Instance.new("UICorner", tab)
-    tabCorner.CornerRadius = UDim.new(0, 8)
+    tabCorner.CornerRadius = UDim.new(0, 6)
     
     local container = Instance.new("ScrollingFrame", contentFrame)
-    container.Size = UDim2.new(1, -30, 1, -30)
-    container.Position = UDim2.new(0, 15, 0, 15)
+    container.Size = UDim2.new(1, -20, 1, -20)
+    container.Position = UDim2.new(0, 10, 0, 10)
     container.BackgroundTransparency = 1
     container.ScrollBarThickness = 4
     container.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 90)
@@ -126,11 +124,11 @@ local function createTab(name, icon)
     container.CanvasSize = UDim2.new(0, 0, 0, 0)
     
     local containerLayout = Instance.new("UIListLayout", container)
-    containerLayout.Padding = UDim.new(0, 10)
+    containerLayout.Padding = UDim.new(0, 8)  -- Mniejsze odstępy
     containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     
     containerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        container.CanvasSize = UDim2.new(0, 0, 0, containerLayout.AbsoluteContentSize.Y + 20)
+        container.CanvasSize = UDim2.new(0, 0, 0, containerLayout.AbsoluteContentSize.Y + 15)
     end)
     
     table.insert(tabsList, tab)
@@ -159,51 +157,50 @@ local binsTab = createTab("KOSZE", "🗑️")
 local playerTab = createTab("PLAYER", "👤")
 
 -- ==========================================
--- ZAKŁADKA PACZKI
+-- ZAKŁADKA PACZKI (SKOMPRESOWANA)
 -- ==========================================
 
--- SZYBKIE OTWIERANIE
+-- SZYBKIE OTWIERANIE (mniejszy przycisk)
 local quickBtn = Instance.new("TextButton", packagesTab)
-quickBtn.Size = UDim2.new(1, -20, 0, 60)
+quickBtn.Size = UDim2.new(1, -10, 0, 45)
 quickBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-quickBtn.Text = "📦 SZYBKIE OTWIERANIE PACZEK"
+quickBtn.Text = "📦 OTWÓRZ PACZKI"
 quickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-quickBtn.TextSize = 20
+quickBtn.TextSize = 16
 quickBtn.Font = Enum.Font.GothamBold
 
 local quickCorner = Instance.new("UICorner", quickBtn)
-quickCorner.CornerRadius = UDim.new(0, 10)
+quickCorner.CornerRadius = UDim.new(0, 8)
 
 -- SEPARATOR
 local sep1 = Instance.new("Frame", packagesTab)
-sep1.Size = UDim2.new(1, -20, 0, 2)
+sep1.Size = UDim2.new(1, -10, 0, 1)
 sep1.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
 sep1.BorderSizePixel = 0
-Instance.new("UICorner", sep1)
 
--- NAGŁÓWEK PAKSTATIONS
+-- NAGŁÓWEK PAKSTATIONS (mniejszy)
 local packHeader = Instance.new("TextLabel", packagesTab)
-packHeader.Size = UDim2.new(1, -20, 0, 40)
+packHeader.Size = UDim2.new(1, -10, 0, 30)
 packHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-packHeader.Text = "🏭 PAKSTATIONS (AUTO-FARM)"
+packHeader.Text = "🏭 PAKSTATIONS"
 packHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-packHeader.TextSize = 18
+packHeader.TextSize = 14
 packHeader.Font = Enum.Font.GothamBold
 
 local packHeaderCorner = Instance.new("UICorner", packHeader)
-packHeaderCorner.CornerRadius = UDim.new(0, 8)
+packHeaderCorner.CornerRadius = UDim.new(0, 6)
 
--- SIATKA PAKSTATIONS
+-- SIATKA PAKSTATIONS (mniejsza)
 local packGrid = Instance.new("Frame", packagesTab)
-packGrid.Size = UDim2.new(1, -20, 0, 300)
+packGrid.Size = UDim2.new(1, -10, 0, 200)
 packGrid.BackgroundTransparency = 1
 
 local gridLayout = Instance.new("UIGridLayout", packGrid)
 gridLayout.FillDirection = Enum.FillDirection.Horizontal
-gridLayout.CellSize = UDim2.new(0, 120, 0, 60)
-gridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+gridLayout.CellSize = UDim2.new(0, 90, 0, 45)  -- Mniejsze komórki
+gridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 
--- LOKACJE PAKSTATIONS
+-- LOKACJE PAKSTATIONS (bez zmian)
 local packLokacje = {
     {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
     {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
@@ -216,7 +213,7 @@ local packLokacje = {
     {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
 }
 
--- FUNKCJE POMOCNICZE DLA PAKSTATIONS
+-- FUNKCJE POMOCNICZE (bez zmian)
 local function applyFast(v)
     if v:IsA("ProximityPrompt") then v.HoldDuration = 0 end
 end
@@ -302,18 +299,18 @@ local function startInstantFarm()
     end
 end
 
--- TWORZENIE PRZYCISKÓW PAKSTATIONS
+-- TWORZENIE PRZYCISKÓW PAKSTATIONS (mniejsze)
 for _, dane in ipairs(packLokacje) do
     local btn = Instance.new("TextButton", packGrid)
     btn.Size = UDim2.new(1, 0, 1, 0)
     btn.Text = dane.nazwa
     btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
+    btn.TextSize = 12  -- Mniejsza czcionka
     btn.Font = Enum.Font.GothamBold
     
     local btnCorner = Instance.new("UICorner", btn)
-    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.CornerRadius = UDim.new(0, 6)
     
     btn.MouseButton1Click:Connect(function()
         local root = player.Character.HumanoidRootPart
@@ -330,28 +327,28 @@ for _, dane in ipairs(packLokacje) do
 end
 
 -- ==========================================
--- ZAKŁADKA TELEPORTY
+-- ZAKŁADKA TELEPORTY (SKOMPRESOWANA)
 -- ==========================================
 
 local tpHeader = Instance.new("TextLabel", teleportsTab)
-tpHeader.Size = UDim2.new(1, -20, 0, 40)
+tpHeader.Size = UDim2.new(1, -10, 0, 30)
 tpHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 tpHeader.Text = "📍 TELEPORTY"
 tpHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpHeader.TextSize = 20
+tpHeader.TextSize = 14
 tpHeader.Font = Enum.Font.GothamBold
 
 local tpHeaderCorner = Instance.new("UICorner", tpHeader)
-tpHeaderCorner.CornerRadius = UDim.new(0, 8)
+tpHeaderCorner.CornerRadius = UDim.new(0, 6)
 
 local tpGrid = Instance.new("Frame", teleportsTab)
-tpGrid.Size = UDim2.new(1, -20, 0, 300)
+tpGrid.Size = UDim2.new(1, -10, 0, 200)
 tpGrid.BackgroundTransparency = 1
 
 local tpGridLayout = Instance.new("UIGridLayout", tpGrid)
 tpGridLayout.FillDirection = Enum.FillDirection.Horizontal
-tpGridLayout.CellSize = UDim2.new(0, 150, 0, 60)
-tpGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+tpGridLayout.CellSize = UDim2.new(0, 110, 0, 45)  -- Mniejsze
+tpGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 
 local teleporty = {
     {nazwa = "BANK", pos = Vector3.new(-471.00, 26.31, -1363.00)},
@@ -370,11 +367,11 @@ for _, dane in ipairs(teleporty) do
     btn.Text = dane.nazwa
     btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
+    btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     
     local btnCorner = Instance.new("UICorner", btn)
-    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.CornerRadius = UDim.new(0, 6)
     
     btn.MouseButton1Click:Connect(function()
         local root = player.Character.HumanoidRootPart
@@ -391,57 +388,57 @@ for _, dane in ipairs(teleporty) do
 end
 
 -- ==========================================
--- ZAKŁADKA KOSZE
+-- ZAKŁADKA KOSZE (SKOMPRESOWANA)
 -- ==========================================
 
 local binsHeader = Instance.new("TextLabel", binsTab)
-binsHeader.Size = UDim2.new(1, -20, 0, 40)
+binsHeader.Size = UDim2.new(1, -10, 0, 30)
 binsHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 binsHeader.Text = "🗑️ AUTO-FARM KOSZE"
 binsHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-binsHeader.TextSize = 20
+binsHeader.TextSize = 14
 binsHeader.Font = Enum.Font.GothamBold
 
 local binsHeaderCorner = Instance.new("UICorner", binsHeader)
-binsHeaderCorner.CornerRadius = UDim.new(0, 8)
+binsHeaderCorner.CornerRadius = UDim.new(0, 6)
 
--- PRZYCISK RĘCZNY
+-- PRZYCISK RĘCZNY (mniejszy)
 local manualBinBtn = Instance.new("TextButton", binsTab)
-manualBinBtn.Size = UDim2.new(1, -20, 0, 70)
+manualBinBtn.Size = UDim2.new(1, -10, 0, 50)
 manualBinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-manualBinBtn.Text = "🖐️ NASTĘPNY KOSZ (RĘCZNIE)"
+manualBinBtn.Text = "🖐️ NASTĘPNY KOSZ"
 manualBinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-manualBinBtn.TextSize = 18
+manualBinBtn.TextSize = 14
 manualBinBtn.Font = Enum.Font.GothamBold
 
 local manualBinCorner = Instance.new("UICorner", manualBinBtn)
-manualBinCorner.CornerRadius = UDim.new(0, 10)
+manualBinCorner.CornerRadius = UDim.new(0, 8)
 
--- PRZYCISK AUTO Z PRZEŁĄCZNIKIEM
+-- PRZYCISK AUTO (mniejszy)
 local autoBinBtn = Instance.new("TextButton", binsTab)
-autoBinBtn.Size = UDim2.new(1, -20, 0, 70)
+autoBinBtn.Size = UDim2.new(1, -10, 0, 50)
 autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-autoBinBtn.Text = "⏯️ START AUTO-FARM"
+autoBinBtn.Text = "▶️ AUTO-FARM"
 autoBinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoBinBtn.TextSize = 18
+autoBinBtn.TextSize = 14
 autoBinBtn.Font = Enum.Font.GothamBold
 
 local autoBinCorner = Instance.new("UICorner", autoBinBtn)
-autoBinCorner.CornerRadius = UDim.new(0, 10)
+autoBinCorner.CornerRadius = UDim.new(0, 8)
 
--- STATUS
+-- STATUS (mniejszy)
 local binStatus = Instance.new("TextLabel", binsTab)
-binStatus.Size = UDim2.new(1, -20, 0, 40)
+binStatus.Size = UDim2.new(1, -10, 0, 30)
 binStatus.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-binStatus.Text = "Gotowy do pracy"
+binStatus.Text = "Gotowy"
 binStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
-binStatus.TextSize = 16
+binStatus.TextSize = 12
 binStatus.Font = Enum.Font.Gotham
 
 local binStatusCorner = Instance.new("UICorner", binStatus)
-binStatusCorner.CornerRadius = UDim.new(0, 8)
+binStatusCorner.CornerRadius = UDim.new(0, 6)
 
--- LOGIKA KOSZY
+-- LOGIKA KOSZY (bez zmian)
 local binIndex = 1
 local kontenery = {}
 local isFarming = false
@@ -486,7 +483,7 @@ manualBinBtn.MouseButton1Click:Connect(function()
     if isFarming then return end
     pobierzKontenery()
     if binIndex > #kontenery then binIndex = 1 end
-    binStatus.Text = "Przetwarzanie kosza " .. binIndex .. "/" .. #kontenery
+    binStatus.Text = "Kosz " .. binIndex .. "/" .. #kontenery
     zbierzZKontenera(kontenery[binIndex])
     binIndex = binIndex + 1
 end)
@@ -494,14 +491,14 @@ end)
 autoBinBtn.MouseButton1Click:Connect(function()
     if isFarming then
         isFarming = false
-        autoBinBtn.Text = "⏯️ START AUTO-FARM"
+        autoBinBtn.Text = "▶️ AUTO-FARM"
         autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-        binStatus.Text = "Auto-farm zatrzymany"
+        binStatus.Text = "Zatrzymany"
         return
     end
 
     isFarming = true
-    autoBinBtn.Text = "⏹️ STOP AUTO-FARM"
+    autoBinBtn.Text = "⏹️ STOP"
     autoBinBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     
     pobierzKontenery()
@@ -510,74 +507,69 @@ autoBinBtn.MouseButton1Click:Connect(function()
         for i = binIndex, #kontenery do
             if not isFarming then break end
             binIndex = i
-            binStatus.Text = "Farming... (" .. i .. "/" .. #kontenery .. ")"
+            binStatus.Text = "Farming " .. i .. "/" .. #kontenery
             
-            local sukces = zbierzZKontenera(kontenery[i])
-            if not sukces then
-                print("Pominięto kontener nr " .. i)
-            end
+            zbierzZKontenera(kontenery[i])
             task.wait(1)
         end
         
         isFarming = false
-        autoBinBtn.Text = "⏯️ START AUTO-FARM"
+        autoBinBtn.Text = "▶️ AUTO-FARM"
         autoBinBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-        binStatus.Text = "Farm zakończony"
+        binStatus.Text = "Zakończony"
     end)()
 end)
 
 -- ==========================================
--- ZAKŁADKA PLAYER
+-- ZAKŁADKA PLAYER (SKOMPRESOWANA)
 -- ==========================================
 
 local playerHeader = Instance.new("TextLabel", playerTab)
-playerHeader.Size = UDim2.new(1, -20, 0, 40)
+playerHeader.Size = UDim2.new(1, -10, 0, 30)
 playerHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-playerHeader.Text = "👤 USTAWIENIA GRACZA"
+playerHeader.Text = "👤 PLAYER"
 playerHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-playerHeader.TextSize = 20
+playerHeader.TextSize = 14
 playerHeader.Font = Enum.Font.GothamBold
 
 local playerHeaderCorner = Instance.new("UICorner", playerHeader)
-playerHeaderCorner.CornerRadius = UDim.new(0, 8)
+playerHeaderCorner.CornerRadius = UDim.new(0, 6)
 
--- NO FALL DMG
+-- NO FALL DMG (mniejszy)
 local noFallFrame = Instance.new("Frame", playerTab)
-noFallFrame.Size = UDim2.new(1, -20, 0, 70)
-noFallFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+noFallFrame.Size = UDim2.new(1, -10, 0, 50)
 
 local noFallCorner = Instance.new("UICorner", noFallFrame)
-noFallCorner.CornerRadius = UDim.new(0, 10)
+noFallCorner.CornerRadius = UDim.new(0, 8)
 
 local noFallLabel = Instance.new("TextLabel", noFallFrame)
 noFallLabel.Size = UDim2.new(0.7, -10, 1, 0)
 noFallLabel.Position = UDim2.new(0, 10, 0, 0)
 noFallLabel.BackgroundTransparency = 1
-noFallLabel.Text = "⚡ NO FALL DAMAGE"
+noFallLabel.Text = "⚡ NO FALL"
 noFallLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-noFallLabel.TextSize = 18
+noFallLabel.TextSize = 14
 noFallLabel.Font = Enum.Font.GothamBold
 noFallLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local noFallToggle = Instance.new("TextButton", noFallFrame)
-noFallToggle.Size = UDim2.new(0, 60, 0, 40)
-noFallToggle.Position = UDim2.new(1, -70, 0.5, -20)
+noFallToggle.Size = UDim2.new(0, 50, 0, 30)
+noFallToggle.Position = UDim2.new(1, -60, 0.5, -15)
 noFallToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 noFallToggle.Text = "OFF"
 noFallToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-noFallToggle.TextSize = 16
+noFallToggle.TextSize = 12
 noFallToggle.Font = Enum.Font.GothamBold
 
 local noFallToggleCorner = Instance.new("UICorner", noFallToggle)
-noFallToggleCorner.CornerRadius = UDim.new(0, 8)
+noFallToggleCorner.CornerRadius = UDim.new(0, 6)
 
--- NOCLIP
+-- NOCLIP (mniejszy)
 local noclipFrame = Instance.new("Frame", playerTab)
-noclipFrame.Size = UDim2.new(1, -20, 0, 70)
-noclipFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+noclipFrame.Size = UDim2.new(1, -10, 0, 50)
 
 local noclipCorner = Instance.new("UICorner", noclipFrame)
-noclipCorner.CornerRadius = UDim.new(0, 10)
+noclipCorner.CornerRadius = UDim.new(0, 8)
 
 local noclipLabel = Instance.new("TextLabel", noclipFrame)
 noclipLabel.Size = UDim2.new(0.7, -10, 1, 0)
@@ -585,89 +577,87 @@ noclipLabel.Position = UDim2.new(0, 10, 0, 0)
 noclipLabel.BackgroundTransparency = 1
 noclipLabel.Text = "🚫 NOCLIP"
 noclipLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipLabel.TextSize = 18
+noclipLabel.TextSize = 14
 noclipLabel.Font = Enum.Font.GothamBold
 noclipLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local noclipToggle = Instance.new("TextButton", noclipFrame)
-noclipToggle.Size = UDim2.new(0, 60, 0, 40)
-noclipToggle.Position = UDim2.new(1, -70, 0.5, -20)
+noclipToggle.Size = UDim2.new(0, 50, 0, 30)
+noclipToggle.Position = UDim2.new(1, -60, 0.5, -15)
 noclipToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 noclipToggle.Text = "OFF"
 noclipToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipToggle.TextSize = 16
+noclipToggle.TextSize = 12
 noclipToggle.Font = Enum.Font.GothamBold
 
 local noclipToggleCorner = Instance.new("UICorner", noclipToggle)
-noclipToggleCorner.CornerRadius = UDim.new(0, 8)
+noclipToggleCorner.CornerRadius = UDim.new(0, 6)
 
--- FLY
+-- FLY (mniejszy)
 local flyFrame = Instance.new("Frame", playerTab)
-flyFrame.Size = UDim2.new(1, -20, 0, 70)
-flyFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+flyFrame.Size = UDim2.new(1, -10, 0, 50)
 
 local flyCorner = Instance.new("UICorner", flyFrame)
-flyCorner.CornerRadius = UDim.new(0, 10)
+flyCorner.CornerRadius = UDim.new(0, 8)
 
 local flyLabel = Instance.new("TextLabel", flyFrame)
 flyLabel.Size = UDim2.new(0.7, -10, 1, 0)
 flyLabel.Position = UDim2.new(0, 10, 0, 0)
 flyLabel.BackgroundTransparency = 1
-flyLabel.Text = "🦅 FLY (klawisz X)"
+flyLabel.Text = "🦅 FLY (X)"
 flyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyLabel.TextSize = 18
+flyLabel.TextSize = 14
 flyLabel.Font = Enum.Font.GothamBold
 flyLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local flyToggle = Instance.new("TextButton", flyFrame)
-flyToggle.Size = UDim2.new(0, 60, 0, 40)
-flyToggle.Position = UDim2.new(1, -70, 0.5, -20)
+flyToggle.Size = UDim2.new(0, 50, 0, 30)
+flyToggle.Position = UDim2.new(1, -60, 0.5, -15)
 flyToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 flyToggle.Text = "OFF"
 flyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyToggle.TextSize = 16
+flyToggle.TextSize = 12
 flyToggle.Font = Enum.Font.GothamBold
 
 local flyToggleCorner = Instance.new("UICorner", flyToggle)
-flyToggleCorner.CornerRadius = UDim.new(0, 8)
+flyToggleCorner.CornerRadius = UDim.new(0, 6)
 
--- SUWAK PRĘDKOŚCI LOTU
+-- SUWAK PRĘDKOŚCI (mniejszy)
 local speedFrame = Instance.new("Frame", playerTab)
-speedFrame.Size = UDim2.new(1, -20, 0, 80)
-speedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+speedFrame.Size = UDim2.new(1, -10, 0, 60)
 
 local speedCorner = Instance.new("UICorner", speedFrame)
-speedCorner.CornerRadius = UDim.new(0, 10)
+speedCorner.CornerRadius = UDim.new(0, 8)
 
 local speedLabel = Instance.new("TextLabel", speedFrame)
-speedLabel.Size = UDim2.new(1, -20, 0, 30)
+speedLabel.Size = UDim2.new(1, -20, 0, 20)
 speedLabel.Position = UDim2.new(0, 10, 0, 5)
 speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "PRĘDKOŚĆ LOTU: 50"
+speedLabel.Text = "PRĘDKOŚĆ: 50"
 speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedLabel.TextSize = 16
+speedLabel.TextSize = 12
 speedLabel.Font = Enum.Font.GothamBold
 speedLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local speedBar = Instance.new("Frame", speedFrame)
-speedBar.Size = UDim2.new(0.9, 0, 0, 10)
-speedBar.Position = UDim2.new(0.05, 0, 0, 45)
+speedBar.Size = UDim2.new(0.9, 0, 0, 8)
+speedBar.Position = UDim2.new(0.05, 0, 0, 35)
 speedBar.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 
 local speedBarCorner = Instance.new("UICorner", speedBar)
-speedBarCorner.CornerRadius = UDim.new(0, 5)
+speedBarCorner.CornerRadius = UDim.new(0, 4)
 
 local speedSlider = Instance.new("TextButton", speedBar)
-speedSlider.Size = UDim2.new(0, 20, 0, 30)
-speedSlider.Position = UDim2.new(0.14, -10, 0.5, -15)
+speedSlider.Size = UDim2.new(0, 16, 0, 24)
+speedSlider.Position = UDim2.new(0.14, -8, 0.5, -12)
 speedSlider.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 speedSlider.Text = ""
 
 local speedSliderCorner = Instance.new("UICorner", speedSlider)
-speedSliderCorner.CornerRadius = UDim.new(0, 10)
+speedSliderCorner.CornerRadius = UDim.new(0, 8)
 
 -- ==========================================
--- LOGIKA PLAYER
+-- LOGIKA PLAYER (bez zmian)
 -- ==========================================
 local noFallActive = false
 local noclipActive = false
@@ -770,9 +760,9 @@ end)
 uis.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local pos = math.clamp((input.Position.X - speedBar.AbsolutePosition.X) / speedBar.AbsoluteSize.X, 0, 1)
-        speedSlider.Position = UDim2.new(pos, -10, 0.5, -15)
+        speedSlider.Position = UDim2.new(pos, -8, 0.5, -12)
         flySpeed = math.floor(pos * 350)
-        speedLabel.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+        speedLabel.Text = "PRĘDKOŚĆ: " .. flySpeed
     end
 end)
 
@@ -810,10 +800,10 @@ quickBtn.MouseButton1Click:Connect(function()
     end
     
     local oldText = quickBtn.Text
-    quickBtn.Text = "✓ PRZENIESIONO: " .. found
+    quickBtn.Text = "✓ " .. found
     quickBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
     task.wait(1)
-    quickBtn.Text = oldText
+    quickBtn.Text = "📦 OTWÓRZ PACZKI"
     quickBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 end)
 
@@ -840,4 +830,4 @@ tabsList[1].BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 tabsList[1].TextColor3 = Color3.fromRGB(255, 255, 255)
 tabContents["PACZKI"].Visible = true
 
-print("✅ Multi-Tool V2 załadowany! Ukryj/pokaż: Prawy Shift")
+print("✅ Multi-Tool (kompakt) załadowany! Prawy Shift = ukryj/pokaż")
