@@ -1,0 +1,192 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+if game.CoreGui:FindFirstChild("MegaHub") then
+game.CoreGui.MegaHub:Destroy()
+end
+
+local gui = Instance.new("ScreenGui",game.CoreGui)
+gui.Name="MegaHub"
+
+local main = Instance.new("Frame",gui)
+main.Size = UDim2.new(0,650,0,420)
+main.Position = UDim2.new(0.3,0,0.25,0)
+main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+main.Active = true
+main.Draggable = true
+
+local title = Instance.new("TextLabel",main)
+title.Size = UDim2.new(1,0,0,50)
+title.Text = "MEGA HUB"
+title.TextSize = 32
+title.Font = Enum.Font.SourceSansBold
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundColor3 = Color3.fromRGB(25,25,25)
+
+local tabs = Instance.new("Frame",main)
+tabs.Size = UDim2.new(0,160,1,-50)
+tabs.Position = UDim2.new(0,0,0,50)
+tabs.BackgroundColor3 = Color3.fromRGB(20,20,20)
+
+local content = Instance.new("Frame",main)
+content.Size = UDim2.new(1,-160,1,-50)
+content.Position = UDim2.new(0,160,0,50)
+content.BackgroundTransparency = 1
+
+function createTab(name)
+
+local btn = Instance.new("TextButton",tabs)
+btn.Size = UDim2.new(1,0,0,55)
+btn.Text = name
+btn.TextSize = 22
+btn.Font = Enum.Font.SourceSansBold
+btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+btn.TextColor3 = Color3.new(1,1,1)
+
+local page = Instance.new("Frame",content)
+page.Size = UDim2.new(1,0,1,0)
+page.Visible = false
+page.BackgroundTransparency = 1
+
+btn.MouseButton1Click:Connect(function()
+
+for _,v in pairs(content:GetChildren()) do
+v.Visible=false
+end
+
+page.Visible=true
+
+end)
+
+return page
+end
+
+local tabPaczki = createTab("PACZKI")
+local tabTp = createTab("TEPEKI")
+local tabKosze = createTab("KOSZE")
+local tabPlayer = createTab("PLAYER")
+
+tabPaczki.Visible=true
+
+function createButton(parent,text,y)
+
+local b = Instance.new("TextButton",parent)
+b.Size = UDim2.new(0,300,0,60)
+b.Position = UDim2.new(0,20,0,y)
+b.Text = text
+b.TextSize = 24
+b.Font = Enum.Font.SourceSansBold
+b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+b.TextColor3 = Color3.new(1,1,1)
+
+return b
+end
+
+-------------------------------------------------
+-- PACZKI
+-------------------------------------------------
+
+local openBtn = createButton(tabPaczki,"SZYBKIE OTWIERANIE",20)
+
+openBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- Szybkieotwieranie paczek.lua
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+
+if pGui:FindFirstChild("HotbarOrganiserV1") then pGui.HotbarOrganiserV1:Destroy() end
+]=])()
+
+end)
+
+local farmBtn = createButton(tabPaczki,"AUTOFARM PACZKI",100)
+
+farmBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- autoffarmpaczki.lua
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+]=])()
+
+end)
+
+-------------------------------------------------
+-- TELEPORTY
+-------------------------------------------------
+
+local tpBtn = createButton(tabTp,"MENU TELEPORTÓW",20)
+
+tpBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- tepeki.lua
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+]=])()
+
+end)
+
+-------------------------------------------------
+-- KOSZE
+-------------------------------------------------
+
+local koszBtn = createButton(tabKosze,"AUTOFARM KOSZE",20)
+
+koszBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- AUTOFARM KOSZE.lua
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+]=])()
+
+end)
+
+-------------------------------------------------
+-- PLAYER
+-------------------------------------------------
+
+local fallBtn = createButton(tabPlayer,"NO FALL DAMAGE",20)
+
+fallBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- nofalldmg.lua
+if _G.CleanupNoFall then
+_G.CleanupNoFall()
+end
+]=])()
+
+end)
+
+local flyBtn = createButton(tabPlayer,"FLY + NOCLIP",100)
+
+flyBtn.MouseButton1Click:Connect(function()
+
+loadstring([=[
+-- fly noclip.lua
+local noclipActive, flying, flySpeed = false, false, 50
+]=])()
+
+end)
+
+-------------------------------------------------
+-- RIGHTSHIFT
+-------------------------------------------------
+
+UIS.InputBegan:Connect(function(i,g)
+
+if g then return end
+
+if i.KeyCode==Enum.KeyCode.RightShift then
+main.Visible = not main.Visible
+end
+
+end)
