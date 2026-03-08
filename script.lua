@@ -399,8 +399,15 @@ btnNoFall.MouseButton1Click:Connect(function()
         btnNoFall.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
     end
 end)
-local noclipActive = false
-local noclipConn
+
+-- ==========================================
+-- DODATEK DO tabPlayer: NOCLIP & FLY (WSAD+Space/Shift)
+-- ==========================================
+
+local noclipActive, flying, flySpeed = false, false, 50
+local noclipConn, bVel, bGyro
+
+-- 1. PRZYCISK NOCLIP
 local btnNoclip = Instance.new("TextButton", tabPlayer)
 btnNoclip.Size = UDim2.new(1, 0, 0, 50)
 btnNoclip.Text = "NOCLIP: OFF"
@@ -409,6 +416,7 @@ btnNoclip.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnNoclip.Font = Enum.Font.SourceSansBold
 btnNoclip.TextSize = 18
 Instance.new("UICorner", btnNoclip).CornerRadius = UDim.new(0, 6)
+
 btnNoclip.MouseButton1Click:Connect(function()
     noclipActive = not noclipActive
     btnNoclip.Text = noclipActive and "NOCLIP: ON" or "NOCLIP: OFF"
@@ -423,7 +431,7 @@ btnNoclip.MouseButton1Click:Connect(function()
         end)
     else
         if noclipConn then noclipConn:Disconnect() end
-        task.wait(0.05)
+        task.wait(0.1)
         if player.Character then
             for _, v in pairs(player.Character:GetDescendants()) do
                 if v:IsA("BasePart") then v.CanCollide = true end
@@ -431,20 +439,20 @@ btnNoclip.MouseButton1Click:Connect(function()
         end
     end
 end)
-local flying = false
-local flySpeed = 50
-local bVel, bGyro
+
+-- 2. PRZYCISK FLY (KLIKALNY + KLAWISZ X)
 local btnFly = Instance.new("TextButton", tabPlayer)
 btnFly.Size = UDim2.new(1, 0, 0, 50)
-btnFly.Text = "FLY: OFF"
+btnFly.Text = "FLY: OFF (X)"
 btnFly.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 btnFly.TextColor3 = Color3.fromRGB(255, 255, 255)
 btnFly.Font = Enum.Font.SourceSansBold
 btnFly.TextSize = 18
 Instance.new("UICorner", btnFly).CornerRadius = UDim.new(0, 6)
-btnFly.MouseButton1Click:Connect(function()
+
+local function toggleFly()
     flying = not flying
-    btnFly.Text = flying and "FLY: ON" or "FLY: OFF"
+    btnFly.Text = flying and "FLY: ON (X)" or "FLY: OFF (X)"
     btnFly.BackgroundColor3 = flying and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
     local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if flying and root then
@@ -458,49 +466,57 @@ btnFly.MouseButton1Click:Connect(function()
         if bGyro then bGyro:Destroy() end
         if player.Character then player.Character.Humanoid.PlatformStand = false end
     end
+end
+
+btnFly.MouseButton1Click:Connect(toggleFly)
+game:GetService("UserInputService").InputBegan:Connect(function(i, gpe)
+    if not gpe and i.KeyCode == Enum.KeyCode.X then toggleFly() end
 end)
-local sliderFrame = Instance.new("Frame", tabPlayer)
-sliderFrame.Size = UDim2.new(1, 0, 0, 60)
-sliderFrame.BackgroundTransparency = 1
-local sLabel = Instance.new("TextLabel", sliderFrame)
-sLabel.Size = UDim2.new(1, 0, 0, 25)
-sLabel.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
-sLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-sLabel.BackgroundTransparency = 1
-sLabel.Font = Enum.Font.SourceSansBold
-sLabel.TextSize = 16
-local bar = Instance.new("Frame", sliderFrame)
+
+-- 3. SUWAK PRĘDKOŚCI
+local sLab = Instance.new("TextLabel", tabPlayer)
+sLab.Size = UDim2.new(1, 0, 0, 25)
+sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+sLab.TextColor3 = Color3.fromRGB(255, 255, 255)
+sLab.BackgroundTransparency = 1
+sLab.Font = Enum.Font.SourceSansBold
+
+local bar = Instance.new("Frame", tabPlayer)
 bar.Size = UDim2.new(0.9, 0, 0, 10)
-bar.Position = UDim2.new(0.05, 0, 0, 35)
 bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Instance.new("UICorner", bar)
+
 local slider = Instance.new("TextButton", bar)
 slider.Size = UDim2.new(0, 20, 0, 30)
 slider.Position = UDim2.new(0.16, -10, 0.5, -15)
 slider.Text = ""
-slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", slider)
+
 local dragging = false
 slider.MouseButton1Down:Connect(function() dragging = true end)
 game:GetService("UserInputService").InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 game:GetService("UserInputService").InputChanged:Connect(function(i)
     if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local pos = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-        slider.Position = UDim2.new(pos, -10, 0.5, -15)
-        flySpeed = math.floor(pos * 300)
-        sLabel.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
+        local p = math.clamp((i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+        slider.Position = UDim2.new(p, -10, 0.5, -15)
+        flySpeed = math.floor(p * 350)
+        sLab.Text = "PRĘDKOŚĆ LOTU: " .. flySpeed
     end
 end)
+
+-- LOGIKA RUCHU (RenderStepped musi być w głównym skrypcie)
 game:GetService("RunService").RenderStepped:Connect(function()
     if flying and bVel and bGyro then
         local dir = Vector3.new(0,0,0)
-        local camCF = workspace.CurrentCamera.CFrame
+        local cf = workspace.CurrentCamera.CFrame
         local uis = game:GetService("UserInputService")
-        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + camCF.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - camCF.LookVector end
-        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - camCF.RightVector end
-        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + camCF.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
         bVel.Velocity = dir * flySpeed
-        bGyro.CFrame = camCF
+        bGyro.CFrame = cf
     end
 end)
