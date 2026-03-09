@@ -1,7 +1,7 @@
 --[[
     ULTIMATE MULTI-TOOL V2 (FULL)
     Kolejność: PLAYER > TP > MISC > PACZKI > KOSZE
-    Dodano: Przycisk "Otwórz paczki" w zakładce PACZKI
+    AUTO-START: NO FALL i NOCLIP włączone domyślnie
 ]]
 
 local Players = game:GetService("Players")
@@ -25,7 +25,7 @@ sgui.DisplayOrder = 999
 
 -- GŁÓWNA RAMKA
 local mainFrame = Instance.new("Frame", sgui)
-mainFrame.Size = UDim2.new(0, 520, 0, 520) -- Większe żeby zmieścić wszystko
+mainFrame.Size = UDim2.new(0, 520, 0, 520)
 mainFrame.Position = UDim2.new(0.5, -260, 0.3, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderSizePixel = 0
@@ -159,108 +159,7 @@ local packagesTab = createTab("PACZKI", "📦")
 local binsTab = createTab("KOSZE", "🗑️")
 
 -- ==========================================
--- ZAKŁADKA PACZKI (z nowym przyciskiem)
--- ==========================================
-
--- NAGŁÓWEK PACZKOMATY
-local packagesHeader = Instance.new("TextLabel", packagesTab)
-packagesHeader.Size = UDim2.new(1, -10, 0, 30)
-packagesHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-packagesHeader.Text = "📦 PACZKOMATY (TELEPORTY)"
-packagesHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-packagesHeader.TextSize = 14
-packagesHeader.Font = Enum.Font.GothamBold
-
-local packagesHeaderCorner = Instance.new("UICorner", packagesHeader)
-packagesHeaderCorner.CornerRadius = UDim.new(0, 6)
-
--- SIATKA PACZKOMATÓW
-local packagesGrid = Instance.new("Frame", packagesTab)
-packagesGrid.Size = UDim2.new(1, -10, 0, 200)
-packagesGrid.BackgroundTransparency = 1
-
-local packagesGridLayout = Instance.new("UIGridLayout", packagesGrid)
-packagesGridLayout.FillDirection = Enum.FillDirection.Horizontal
-packagesGridLayout.CellSize = UDim2.new(0, 90, 0, 45)
-packagesGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
-
-local packLokacje = {
-    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
-    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
-    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12)},
-    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73)},
-    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99)},
-    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19)},
-    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45)},
-    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64)},
-    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
-}
-
--- Tworzenie przycisków paczkomatów
-for _, dane in ipairs(packLokacje) do
-    local btn = Instance.new("TextButton", packagesGrid)
-    btn.Size = UDim2.new(1, 0, 1, 0)
-    btn.Text = dane.nazwa
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
-    btn.Font = Enum.Font.GothamBold
-    
-    local btnCorner = Instance.new("UICorner", btn)
-    btnCorner.CornerRadius = UDim.new(0, 6)
-    
-    btn.MouseButton1Click:Connect(function()
-        local root = player.Character.HumanoidRootPart
-        root.Anchored = true
-        root.CFrame = CFrame.new(dane.pos)
-        task.wait(0.5)
-        root.Anchored = false
-        
-        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-        task.wait(0.2)
-        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-    end)
-end
-
--- NOWY PRZYCISK "OTWÓRZ PACZKI"
-local openPackagesBtn = Instance.new("TextButton", packagesTab)
-openPackagesBtn.Size = UDim2.new(1, -10, 0, 50)
-openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
-openPackagesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-openPackagesBtn.TextSize = 14
-openPackagesBtn.Font = Enum.Font.GothamBold
-
-local openPackagesCorner = Instance.new("UICorner", openPackagesBtn)
-openPackagesCorner.CornerRadius = UDim.new(0, 8)
-
--- Funkcja otwierania paczek
-local function sortPackagesToHotbar()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hum = char:WaitForChild("Humanoid")
-    local backpack = player:WaitForChild("Backpack")
-    
-    local found = 0
-    for _, item in ipairs(backpack:GetChildren()) do
-        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
-            hum:EquipTool(item)
-            found = found + 1
-            task.wait(0.02)
-        end
-    end
-    
-    local oldText = openPackagesBtn.Text
-    openPackagesBtn.Text = "✓ PRZENIESIONO: " .. found
-    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-    task.wait(1)
-    openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
-    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-end
-
-openPackagesBtn.MouseButton1Click:Connect(sortPackagesToHotbar)
-
--- ==========================================
--- ZAKŁADKA PLAYER
+-- ZAKŁADKA PLAYER (Z AUTOSTARTEM)
 -- ==========================================
 local playerHeader = Instance.new("TextLabel", playerTab)
 playerHeader.Size = UDim2.new(1, -10, 0, 30)
@@ -293,8 +192,8 @@ noFallLabel.TextXAlignment = Enum.TextXAlignment.Left
 local noFallToggle = Instance.new("TextButton", noFallFrame)
 noFallToggle.Size = UDim2.new(0, 50, 0, 30)
 noFallToggle.Position = UDim2.new(1, -60, 0.5, -15)
-noFallToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-noFallToggle.Text = "OFF"
+noFallToggle.BackgroundColor3 = Color3.fromRGB(0, 150, 0)  -- ZIELONY (ON)
+noFallToggle.Text = "ON"
 noFallToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 noFallToggle.TextSize = 12
 noFallToggle.Font = Enum.Font.GothamBold
@@ -322,8 +221,8 @@ noclipLabel.TextXAlignment = Enum.TextXAlignment.Left
 local noclipToggle = Instance.new("TextButton", noclipFrame)
 noclipToggle.Size = UDim2.new(0, 50, 0, 30)
 noclipToggle.Position = UDim2.new(1, -60, 0.5, -15)
-noclipToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-noclipToggle.Text = "OFF"
+noclipToggle.BackgroundColor3 = Color3.fromRGB(0, 150, 0)  -- ZIELONY (ON)
+noclipToggle.Text = "ON"
 noclipToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 noclipToggle.TextSize = 12
 noclipToggle.Font = Enum.Font.GothamBold
@@ -397,8 +296,8 @@ speedSliderCorner.CornerRadius = UDim.new(0, 8)
 -- ==========================================
 -- LOGIKA PLAYER
 -- ==========================================
-local noFallActive = false
-local noclipActive = false
+local noFallActive = true  -- DOMYŚLNIE WŁĄCZONE
+local noclipActive = true  -- DOMYŚLNIE WŁĄCZONE
 local flying = false
 local flySpeed = 50
 local noclipConn = nil
@@ -426,13 +325,14 @@ if event then
     end)
 end
 
+-- Przycisk NO FALL
 noFallToggle.MouseButton1Click:Connect(function()
     noFallActive = not noFallActive
     noFallToggle.BackgroundColor3 = noFallActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
     noFallToggle.Text = noFallActive and "ON" or "OFF"
 end)
 
--- NOCLIP
+-- Przycisk NOCLIP
 noclipToggle.MouseButton1Click:Connect(function()
     noclipActive = not noclipActive
     noclipToggle.BackgroundColor3 = noclipActive and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
@@ -518,6 +418,29 @@ runService.RenderStepped:Connect(function()
         bVel.Velocity = dir * flySpeed
         bGyro.CFrame = cf
     end
+end)
+
+-- ==========================================
+-- AUTOSTART PO ZAŁADOWANIU
+-- ==========================================
+task.spawn(function()
+    task.wait(1.5)  -- Czekamy aż gra i postać się załadują
+    
+    -- Upewnij się że NO FALL jest aktywne
+    noFallActive = true
+    print("⚡ NO FALL auto-start")
+    
+    -- Upewnij się że NOCLIP jest aktywne
+    noclipActive = true
+    if noclipConn then noclipConn:Disconnect() end
+    noclipConn = runService.Stepped:Connect(function()
+        if noclipActive and player.Character then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
+    print("🚫 NOCLIP auto-start")
 end)
 
 -- ==========================================
@@ -770,6 +693,103 @@ drillBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
+-- ZAKŁADKA PACZKI
+-- ==========================================
+local packagesHeader = Instance.new("TextLabel", packagesTab)
+packagesHeader.Size = UDim2.new(1, -10, 0, 30)
+packagesHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+packagesHeader.Text = "📦 PACZKOMATY (TELEPORTY)"
+packagesHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+packagesHeader.TextSize = 14
+packagesHeader.Font = Enum.Font.GothamBold
+
+local packagesHeaderCorner = Instance.new("UICorner", packagesHeader)
+packagesHeaderCorner.CornerRadius = UDim.new(0, 6)
+
+local packagesGrid = Instance.new("Frame", packagesTab)
+packagesGrid.Size = UDim2.new(1, -10, 0, 200)
+packagesGrid.BackgroundTransparency = 1
+
+local packagesGridLayout = Instance.new("UIGridLayout", packagesGrid)
+packagesGridLayout.FillDirection = Enum.FillDirection.Horizontal
+packagesGridLayout.CellSize = UDim2.new(0, 90, 0, 45)
+packagesGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
+
+local packLokacje = {
+    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
+    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
+    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12)},
+    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73)},
+    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99)},
+    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19)},
+    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45)},
+    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64)},
+    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
+}
+
+for _, dane in ipairs(packLokacje) do
+    local btn = Instance.new("TextButton", packagesGrid)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Text = dane.nazwa
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    
+    btn.MouseButton1Click:Connect(function()
+        local root = player.Character.HumanoidRootPart
+        root.Anchored = true
+        root.CFrame = CFrame.new(dane.pos)
+        task.wait(0.5)
+        root.Anchored = false
+        
+        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+        task.wait(0.2)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    end)
+end
+
+-- Przycisk "OTWÓRZ PACZKI"
+local openPackagesBtn = Instance.new("TextButton", packagesTab)
+openPackagesBtn.Size = UDim2.new(1, -10, 0, 50)
+openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
+openPackagesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+openPackagesBtn.TextSize = 14
+openPackagesBtn.Font = Enum.Font.GothamBold
+
+local openPackagesCorner = Instance.new("UICorner", openPackagesBtn)
+openPackagesCorner.CornerRadius = UDim.new(0, 8)
+
+-- Funkcja otwierania paczek
+local function sortPackagesToHotbar()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local backpack = player:WaitForChild("Backpack")
+    
+    local found = 0
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
+            hum:EquipTool(item)
+            found = found + 1
+            task.wait(0.02)
+        end
+    end
+    
+    local oldText = openPackagesBtn.Text
+    openPackagesBtn.Text = "✓ PRZENIESIONO: " .. found
+    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+    task.wait(1)
+    openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
+    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+end
+
+openPackagesBtn.MouseButton1Click:Connect(sortPackagesToHotbar)
+
+-- ==========================================
 -- ZAKŁADKA KOSZE
 -- ==========================================
 local binsHeader = Instance.new("TextLabel", binsTab)
@@ -926,5 +946,5 @@ tabContents["PLAYER"].Visible = true
 
 print("✅ MULTI-TOOL V2 ZAŁADOWANY!")
 print("📌 Zakładki: PLAYER > TP > MISC > PACZKI > KOSZE")
-print("📦 W zakładce PACZKI dodano przycisk 'OTWÓRZ PACZKI'")
+print("⚡ NO FALL i 🚫 NOCLIP włączone automatycznie!")
 print("👁️ Ukryj/pokaż: Prawy Shift")
