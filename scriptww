@@ -1,6 +1,7 @@
 --[[
-    ULTIMATE MULTI-TOOL V2 (Kompaktowy)
+    ULTIMATE MULTI-TOOL V2 (FULL)
     Kolejność: PLAYER > TP > MISC > PACZKI > KOSZE
+    Dodano: Przycisk "Otwórz paczki" w zakładce PACZKI
 ]]
 
 local Players = game:GetService("Players")
@@ -24,8 +25,8 @@ sgui.DisplayOrder = 999
 
 -- GŁÓWNA RAMKA
 local mainFrame = Instance.new("Frame", sgui)
-mainFrame.Size = UDim2.new(0, 500, 0, 450) -- Trochę większe dla nowej zakładki
-mainFrame.Position = UDim2.new(0.5, -250, 0.3, -150)
+mainFrame.Size = UDim2.new(0, 520, 0, 520) -- Większe żeby zmieścić wszystko
+mainFrame.Position = UDim2.new(0.5, -260, 0.3, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -58,7 +59,7 @@ local title = Instance.new("TextLabel", header)
 title.Size = UDim2.new(1, -40, 1, 0)
 title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "⚡ MULTI-TOOL ⚡"
+title.Text = "⚡ MULTI-TOOL V2 ⚡"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 20
 title.Font = Enum.Font.GothamBold
@@ -103,7 +104,7 @@ contentCorner.CornerRadius = UDim.new(0, 10)
 -- FUNKCJA TWORZENIA ZAKŁADKI
 local function createTab(name, icon)
     local tab = Instance.new("TextButton", tabs)
-    tab.Size = UDim2.new(0, 80, 1, 0) -- Trochę węższe żeby zmieścić 5 zakładek
+    tab.Size = UDim2.new(0, 80, 1, 0)
     tab.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
     tab.Text = icon .. " " .. name
     tab.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -150,207 +151,117 @@ local function createTab(name, icon)
     return container
 end
 
--- TWORZENIE ZAKŁADEK (NOWA KOLEJNOŚĆ Z MISC)
-local playerTab = createTab("PLAYER", "👤")     -- 1. Player
-local teleportsTab = createTab("TP", "🌍")      -- 2. Teleporty
-local miscTab = createTab("MISC", "⚙️")         -- 3. MISC (nowa zakładka)
-local packagesTab = createTab("PACZKI", "📦")   -- 4. Paczki
-local binsTab = createTab("KOSZE", "🗑️")        -- 5. Kosze
+-- TWORZENIE ZAKŁADEK
+local playerTab = createTab("PLAYER", "👤")
+local teleportsTab = createTab("TP", "🌍")
+local miscTab = createTab("MISC", "⚙️")
+local packagesTab = createTab("PACZKI", "📦")
+local binsTab = createTab("KOSZE", "🗑️")
 
 -- ==========================================
--- ZAKŁADKA MISC (AUTO COLLECT / DRILL)
+-- ZAKŁADKA PACZKI (z nowym przyciskiem)
 -- ==========================================
 
-local miscHeader = Instance.new("TextLabel", miscTab)
-miscHeader.Size = UDim2.new(1, -10, 0, 30)
-miscHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-miscHeader.Text = "⚙️ AUTO COLLECT / DRILL"
-miscHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-miscHeader.TextSize = 14
-miscHeader.Font = Enum.Font.GothamBold
+-- NAGŁÓWEK PACZKOMATY
+local packagesHeader = Instance.new("TextLabel", packagesTab)
+packagesHeader.Size = UDim2.new(1, -10, 0, 30)
+packagesHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+packagesHeader.Text = "📦 PACZKOMATY (TELEPORTY)"
+packagesHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+packagesHeader.TextSize = 14
+packagesHeader.Font = Enum.Font.GothamBold
 
-local miscHeaderCorner = Instance.new("UICorner", miscHeader)
-miscHeaderCorner.CornerRadius = UDim.new(0, 6)
+local packagesHeaderCorner = Instance.new("UICorner", packagesHeader)
+packagesHeaderCorner.CornerRadius = UDim.new(0, 6)
 
--- AUTO COLLECT (E)
-local collectBtn = Instance.new("TextButton", miscTab)
-collectBtn.Size = UDim2.new(1, -10, 0, 45)
-collectBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-collectBtn.Text = "📦 AUTO COLLECT: OFF"
-collectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-collectBtn.TextSize = 14
-collectBtn.Font = Enum.Font.GothamBold
+-- SIATKA PACZKOMATÓW
+local packagesGrid = Instance.new("Frame", packagesTab)
+packagesGrid.Size = UDim2.new(1, -10, 0, 200)
+packagesGrid.BackgroundTransparency = 1
 
-local collectCorner = Instance.new("UICorner", collectBtn)
-collectCorner.CornerRadius = UDim.new(0, 8)
+local packagesGridLayout = Instance.new("UIGridLayout", packagesGrid)
+packagesGridLayout.FillDirection = Enum.FillDirection.Horizontal
+packagesGridLayout.CellSize = UDim2.new(0, 90, 0, 45)
+packagesGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 
--- FAST COLLECT
-local fastBtn = Instance.new("TextButton", miscTab)
-fastBtn.Size = UDim2.new(1, -10, 0, 45)
-fastBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-fastBtn.Text = "⚡ FAST COLLECT: OFF"
-fastBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-fastBtn.TextSize = 14
-fastBtn.Font = Enum.Font.GothamBold
+local packLokacje = {
+    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
+    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
+    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12)},
+    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73)},
+    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99)},
+    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19)},
+    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45)},
+    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64)},
+    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
+}
 
-local fastCorner = Instance.new("UICorner", fastBtn)
-fastCorner.CornerRadius = UDim.new(0, 8)
-
--- AUTO DRILL (F)
-local drillBtn = Instance.new("TextButton", miscTab)
-drillBtn.Size = UDim2.new(1, -10, 0, 45)
-drillBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-drillBtn.Text = "🔧 AUTO DRILL: OFF"
-drillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-drillBtn.TextSize = 14
-drillBtn.Font = Enum.Font.GothamBold
-
-local drillCorner = Instance.new("UICorner", drillBtn)
-drillCorner.CornerRadius = UDim.new(0, 8)
-
--- Status
-local miscStatus = Instance.new("TextLabel", miscTab)
-miscStatus.Size = UDim2.new(1, -10, 0, 30)
-miscStatus.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-miscStatus.Text = "Gotowy"
-miscStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
-miscStatus.TextSize = 12
-miscStatus.Font = Enum.Font.Gotham
-
-local miscStatusCorner = Instance.new("UICorner", miscStatus)
-miscStatusCorner.CornerRadius = UDim.new(0, 6)
-
--- Zmienne dla MISC
-local collectActive = false
-local fastActive = false
-local drillActive = false
-local lastCollect = 0
-local lastDrill = 0
-local collectLoop = nil
-local drillLoop = nil
-local fastConnection = nil
-
--- Kliknięcie
-local function click(key)
-    vim:SendKeyEvent(true, key, false, game)
-    task.wait(0.02)
-    vim:SendKeyEvent(false, key, false, game)
-end
-
--- FAST COLLECT
-local function makeFast(inst)
-    if fastActive and inst:IsA("ProximityPrompt") then
-        inst.HoldDuration = 0
-    end
-end
-
--- Pętla Collect (lekka)
-local function startCollectLoop()
-    collectLoop = coroutine.wrap(function()
-        while collectActive do
-            local char = player.Character
-            if char then
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.E then
-                            local dist = (root.Position - obj.Parent.Position).Magnitude
-                            if dist < 15 and (tick() - lastCollect > 0.2) then
-                                lastCollect = tick()
-                                click(Enum.KeyCode.E)
-                                miscStatus.Text = "Zbieram..."
-                            end
-                        end
-                    end
-                end
-            end
-            task.wait(0.2)
-        end
-        miscStatus.Text = "Collect wyłączony"
+-- Tworzenie przycisków paczkomatów
+for _, dane in ipairs(packLokacje) do
+    local btn = Instance.new("TextButton", packagesGrid)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Text = dane.nazwa
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    
+    btn.MouseButton1Click:Connect(function()
+        local root = player.Character.HumanoidRootPart
+        root.Anchored = true
+        root.CFrame = CFrame.new(dane.pos)
+        task.wait(0.5)
+        root.Anchored = false
+        
+        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+        task.wait(0.2)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
     end)
-    collectLoop()
 end
 
--- Pętla Drill (rzadziej)
-local function startDrillLoop()
-    drillLoop = coroutine.wrap(function()
-        while drillActive do
-            local char = player.Character
-            if char then
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    for _, obj in ipairs(workspace:GetDescendants()) do
-                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.F then
-                            local dist = (root.Position - obj.Parent.Position).Magnitude
-                            if dist < 15 and (tick() - lastDrill > 1.5) then
-                                lastDrill = tick()
-                                click(Enum.KeyCode.F)
-                                miscStatus.Text = "Drilluję..."
-                            end
-                        end
-                    end
-                end
-            end
-            task.wait(0.5)
+-- NOWY PRZYCISK "OTWÓRZ PACZKI"
+local openPackagesBtn = Instance.new("TextButton", packagesTab)
+openPackagesBtn.Size = UDim2.new(1, -10, 0, 50)
+openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
+openPackagesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+openPackagesBtn.TextSize = 14
+openPackagesBtn.Font = Enum.Font.GothamBold
+
+local openPackagesCorner = Instance.new("UICorner", openPackagesBtn)
+openPackagesCorner.CornerRadius = UDim.new(0, 8)
+
+-- Funkcja otwierania paczek
+local function sortPackagesToHotbar()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local backpack = player:WaitForChild("Backpack")
+    
+    local found = 0
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") and (item.Name:find("Package") or item.Name:find("Paczka") or item.Name:find("{")) then
+            hum:EquipTool(item)
+            found = found + 1
+            task.wait(0.02)
         end
-        miscStatus.Text = "Drill wyłączony"
-    end)
-    drillLoop()
+    end
+    
+    local oldText = openPackagesBtn.Text
+    openPackagesBtn.Text = "✓ PRZENIESIONO: " .. found
+    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+    task.wait(1)
+    openPackagesBtn.Text = "📦 OTWÓRZ PACZKI (przenieś na pasek)"
+    openPackagesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 end
 
--- Collect button
-collectBtn.MouseButton1Click:Connect(function()
-    collectActive = not collectActive
-    collectBtn.BackgroundColor3 = collectActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    collectBtn.Text = collectActive and "📦 AUTO COLLECT: ON" or "📦 AUTO COLLECT: OFF"
-    
-    if collectActive then
-        startCollectLoop()
-        miscStatus.Text = "Collect włączony"
-    else
-        miscStatus.Text = "Collect wyłączony"
-    end
-end)
-
--- Fast button
-fastBtn.MouseButton1Click:Connect(function()
-    fastActive = not fastActive
-    fastBtn.BackgroundColor3 = fastActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    fastBtn.Text = fastActive and "⚡ FAST COLLECT: ON" or "⚡ FAST COLLECT: OFF"
-    
-    if fastActive then
-        for _, v in ipairs(workspace:GetDescendants()) do
-            makeFast(v)
-        end
-        fastConnection = workspace.DescendantAdded:Connect(makeFast)
-        miscStatus.Text = "Fast włączony"
-    else
-        if fastConnection then
-            fastConnection:Disconnect()
-            fastConnection = nil
-        end
-        miscStatus.Text = "Fast wyłączony"
-    end
-end)
-
--- Drill button
-drillBtn.MouseButton1Click:Connect(function()
-    drillActive = not drillActive
-    drillBtn.BackgroundColor3 = drillActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    drillBtn.Text = drillActive and "🔧 AUTO DRILL: ON" or "🔧 AUTO DRILL: OFF"
-    
-    if drillActive then
-        startDrillLoop()
-        miscStatus.Text = "Drill włączony"
-    else
-        miscStatus.Text = "Drill wyłączony"
-    end
-end)
+openPackagesBtn.MouseButton1Click:Connect(sortPackagesToHotbar)
 
 -- ==========================================
--- ZAKŁADKA PLAYER (bez zmian)
+-- ZAKŁADKA PLAYER
 -- ==========================================
--- [Tutaj cały kod PLAYER z poprzedniej wersji - zachowujemy bez zmian]
 local playerHeader = Instance.new("TextLabel", playerTab)
 playerHeader.Size = UDim2.new(1, -10, 0, 30)
 playerHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
@@ -484,7 +395,7 @@ local speedSliderCorner = Instance.new("UICorner", speedSlider)
 speedSliderCorner.CornerRadius = UDim.new(0, 8)
 
 -- ==========================================
--- LOGIKA PLAYER (bez zmian)
+-- LOGIKA PLAYER
 -- ==========================================
 local noFallActive = false
 local noclipActive = false
@@ -610,7 +521,7 @@ runService.RenderStepped:Connect(function()
 end)
 
 -- ==========================================
--- ZAKŁADKA TELEPORTY (bez zmian)
+-- ZAKŁADKA TELEPORTY
 -- ==========================================
 local tpHeader = Instance.new("TextLabel", teleportsTab)
 tpHeader.Size = UDim2.new(1, -10, 0, 30)
@@ -670,67 +581,196 @@ for _, dane in ipairs(teleporty) do
 end
 
 -- ==========================================
--- ZAKŁADKA PACZKI (TYLKO TELEPORTY)
+-- ZAKŁADKA MISC
 -- ==========================================
-local packagesHeader = Instance.new("TextLabel", packagesTab)
-packagesHeader.Size = UDim2.new(1, -10, 0, 30)
-packagesHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-packagesHeader.Text = "📦 PACZKOMATY (TELEPORTY)"
-packagesHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-packagesHeader.TextSize = 14
-packagesHeader.Font = Enum.Font.GothamBold
+local miscHeader = Instance.new("TextLabel", miscTab)
+miscHeader.Size = UDim2.new(1, -10, 0, 30)
+miscHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+miscHeader.Text = "⚙️ AUTO COLLECT / DRILL"
+miscHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+miscHeader.TextSize = 14
+miscHeader.Font = Enum.Font.GothamBold
 
-local packagesHeaderCorner = Instance.new("UICorner", packagesHeader)
-packagesHeaderCorner.CornerRadius = UDim.new(0, 6)
+local miscHeaderCorner = Instance.new("UICorner", miscHeader)
+miscHeaderCorner.CornerRadius = UDim.new(0, 6)
 
-local packagesGrid = Instance.new("Frame", packagesTab)
-packagesGrid.Size = UDim2.new(1, -10, 0, 250)
-packagesGrid.BackgroundTransparency = 1
+-- AUTO COLLECT (E)
+local collectBtn = Instance.new("TextButton", miscTab)
+collectBtn.Size = UDim2.new(1, -10, 0, 45)
+collectBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+collectBtn.Text = "📦 AUTO COLLECT: OFF"
+collectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+collectBtn.TextSize = 14
+collectBtn.Font = Enum.Font.GothamBold
 
-local packagesGridLayout = Instance.new("UIGridLayout", packagesGrid)
-packagesGridLayout.FillDirection = Enum.FillDirection.Horizontal
-packagesGridLayout.CellSize = UDim2.new(0, 90, 0, 45)
-packagesGridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
+local collectCorner = Instance.new("UICorner", collectBtn)
+collectCorner.CornerRadius = UDim.new(0, 8)
 
-local packLokacje = {
-    {nazwa = "PACK 1", pos = Vector3.new(-232.98, 44.21, -684.50)},
-    {nazwa = "PACK 2", pos = Vector3.new(505.55, 44.61, -1763.12)},
-    {nazwa = "PACK 3", pos = Vector3.new(111.04, 72.06, 903.12)},
-    {nazwa = "PACK 4", pos = Vector3.new(-961.04, 44.58, 224.73)},
-    {nazwa = "PACK 5", pos = Vector3.new(-2080.92, 44.61, 409.99)},
-    {nazwa = "PACK 6", pos = Vector3.new(-1882.03, 44.61, -621.19)},
-    {nazwa = "PACK 7", pos = Vector3.new(-1686.65, 44.81, -1264.45)},
-    {nazwa = "PACK 8", pos = Vector3.new(818.20, 71.66, 249.64)},
-    {nazwa = "PACK 9", pos = Vector3.new(-1316.20, 44.16, -1120.00)},
-}
+-- FAST COLLECT
+local fastBtn = Instance.new("TextButton", miscTab)
+fastBtn.Size = UDim2.new(1, -10, 0, 45)
+fastBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+fastBtn.Text = "⚡ FAST COLLECT: OFF"
+fastBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fastBtn.TextSize = 14
+fastBtn.Font = Enum.Font.GothamBold
 
-for _, dane in ipairs(packLokacje) do
-    local btn = Instance.new("TextButton", packagesGrid)
-    btn.Size = UDim2.new(1, 0, 1, 0)
-    btn.Text = dane.nazwa
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
-    btn.Font = Enum.Font.GothamBold
-    
-    local btnCorner = Instance.new("UICorner", btn)
-    btnCorner.CornerRadius = UDim.new(0, 6)
-    
-    btn.MouseButton1Click:Connect(function()
-        local root = player.Character.HumanoidRootPart
-        root.Anchored = true
-        root.CFrame = CFrame.new(dane.pos)
-        task.wait(0.5)
-        root.Anchored = false
-        
-        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-        task.wait(0.2)
-        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-    end)
+local fastCorner = Instance.new("UICorner", fastBtn)
+fastCorner.CornerRadius = UDim.new(0, 8)
+
+-- AUTO DRILL (F)
+local drillBtn = Instance.new("TextButton", miscTab)
+drillBtn.Size = UDim2.new(1, -10, 0, 45)
+drillBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+drillBtn.Text = "🔧 AUTO DRILL: OFF"
+drillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+drillBtn.TextSize = 14
+drillBtn.Font = Enum.Font.GothamBold
+
+local drillCorner = Instance.new("UICorner", drillBtn)
+drillCorner.CornerRadius = UDim.new(0, 8)
+
+-- Status
+local miscStatus = Instance.new("TextLabel", miscTab)
+miscStatus.Size = UDim2.new(1, -10, 0, 30)
+miscStatus.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+miscStatus.Text = "Gotowy"
+miscStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+miscStatus.TextSize = 12
+miscStatus.Font = Enum.Font.Gotham
+
+local miscStatusCorner = Instance.new("UICorner", miscStatus)
+miscStatusCorner.CornerRadius = UDim.new(0, 6)
+
+-- Zmienne dla MISC
+local collectActive = false
+local fastActive = false
+local drillActive = false
+local lastCollect = 0
+local lastDrill = 0
+local collectLoop = nil
+local drillLoop = nil
+local fastConnection = nil
+
+-- Kliknięcie
+local function click(key)
+    vim:SendKeyEvent(true, key, false, game)
+    task.wait(0.02)
+    vim:SendKeyEvent(false, key, false, game)
 end
 
+-- FAST COLLECT
+local function makeFast(inst)
+    if fastActive and inst:IsA("ProximityPrompt") then
+        inst.HoldDuration = 0
+    end
+end
+
+-- Pętla Collect
+local function startCollectLoop()
+    collectLoop = coroutine.wrap(function()
+        while collectActive do
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.E then
+                            local dist = (root.Position - obj.Parent.Position).Magnitude
+                            if dist < 15 and (tick() - lastCollect > 0.2) then
+                                lastCollect = tick()
+                                click(Enum.KeyCode.E)
+                                miscStatus.Text = "Zbieram..."
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+        miscStatus.Text = "Collect wyłączony"
+    end)
+    collectLoop()
+end
+
+-- Pętla Drill
+local function startDrillLoop()
+    drillLoop = coroutine.wrap(function()
+        while drillActive do
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") and obj.KeyboardKeyCode == Enum.KeyCode.F then
+                            local dist = (root.Position - obj.Parent.Position).Magnitude
+                            if dist < 15 and (tick() - lastDrill > 1.5) then
+                                lastDrill = tick()
+                                click(Enum.KeyCode.F)
+                                miscStatus.Text = "Drilluję..."
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.5)
+        end
+        miscStatus.Text = "Drill wyłączony"
+    end)
+    drillLoop()
+end
+
+-- Collect button
+collectBtn.MouseButton1Click:Connect(function()
+    collectActive = not collectActive
+    collectBtn.BackgroundColor3 = collectActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    collectBtn.Text = collectActive and "📦 AUTO COLLECT: ON" or "📦 AUTO COLLECT: OFF"
+    
+    if collectActive then
+        startCollectLoop()
+        miscStatus.Text = "Collect włączony"
+    else
+        miscStatus.Text = "Collect wyłączony"
+    end
+end)
+
+-- Fast button
+fastBtn.MouseButton1Click:Connect(function()
+    fastActive = not fastActive
+    fastBtn.BackgroundColor3 = fastActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    fastBtn.Text = fastActive and "⚡ FAST COLLECT: ON" or "⚡ FAST COLLECT: OFF"
+    
+    if fastActive then
+        for _, v in ipairs(workspace:GetDescendants()) do
+            makeFast(v)
+        end
+        fastConnection = workspace.DescendantAdded:Connect(makeFast)
+        miscStatus.Text = "Fast włączony"
+    else
+        if fastConnection then
+            fastConnection:Disconnect()
+            fastConnection = nil
+        end
+        miscStatus.Text = "Fast wyłączony"
+    end
+end)
+
+-- Drill button
+drillBtn.MouseButton1Click:Connect(function()
+    drillActive = not drillActive
+    drillBtn.BackgroundColor3 = drillActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    drillBtn.Text = drillActive and "🔧 AUTO DRILL: ON" or "🔧 AUTO DRILL: OFF"
+    
+    if drillActive then
+        startDrillLoop()
+        miscStatus.Text = "Drill włączony"
+    else
+        miscStatus.Text = "Drill wyłączony"
+    end
+end)
+
 -- ==========================================
--- ZAKŁADKA KOSZE (bez zmian)
+-- ZAKŁADKA KOSZE
 -- ==========================================
 local binsHeader = Instance.new("TextLabel", binsTab)
 binsHeader.Size = UDim2.new(1, -10, 0, 30)
@@ -879,11 +919,12 @@ hideBtn.MouseButton1Click:Connect(function()
     hideBtn.Text = guiVisible and "👁️" or "👁️‍🗨️"
 end)
 
--- AKTYWUJ PIERWSZĄ ZAKŁADKĘ (PLAYER) - POPRAWIONE!
+-- AKTYWUJ PIERWSZĄ ZAKŁADKĘ (PLAYER)
 tabsList[1].BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 tabsList[1].TextColor3 = Color3.fromRGB(255, 255, 255)
 tabContents["PLAYER"].Visible = true
 
-print("✅ Multi-Tool załadowany! Kolejność: PLAYER > TP > MISC > PACZKI > KOSZE")
-print("📌 Domyślnie otwarta zakładka PLAYER")
-print("⚙️ Nowa zakładka MISC z auto collect/drill")
+print("✅ MULTI-TOOL V2 ZAŁADOWANY!")
+print("📌 Zakładki: PLAYER > TP > MISC > PACZKI > KOSZE")
+print("📦 W zakładce PACZKI dodano przycisk 'OTWÓRZ PACZKI'")
+print("👁️ Ukryj/pokaż: Prawy Shift")
